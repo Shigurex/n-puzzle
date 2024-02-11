@@ -3,6 +3,7 @@ mod generator;
 
 use anyhow::Result;
 
+#[derive(Debug)]
 pub enum PuzzleSettings {
     Size(usize),
     TextPath(String),
