@@ -3,7 +3,7 @@ mod generator;
 
 use anyhow::Result;
 
-pub enum PuzzleSetings {
+pub enum PuzzleSettings {
     Size(usize),
     TextPath(String),
 }
@@ -11,10 +11,10 @@ pub enum PuzzleSetings {
 pub struct Puzzle {}
 
 impl Puzzle {
-    pub fn new(settings: PuzzleSetings) -> Result<Self> {
+    pub fn new(settings: PuzzleSettings) -> Result<Self> {
         match settings {
-            PuzzleSetings::Size(size) => Self::generate(size),
-            PuzzleSetings::TextPath(text_path) => Self::parse_text(text_path),
+            PuzzleSettings::Size(size) => Self::generate(size),
+            PuzzleSettings::TextPath(text_path) => Self::parse_text(text_path),
         }
     }
 }

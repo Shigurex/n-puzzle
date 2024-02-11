@@ -2,7 +2,7 @@ mod args;
 mod n_puzzle;
 mod algorithm;
 
-pub use n_puzzle::{PuzzleSetings, Puzzle};
+pub use n_puzzle::{PuzzleSettings, Puzzle};
 pub use algorithm::{Algorithm, Heuristic};
 
 use anyhow::Result;
