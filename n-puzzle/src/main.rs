@@ -11,7 +11,11 @@ use algorithm::Solver;
 
 fn run() -> Result<()> {
     // Parse arguments
-    let settings = parse_args()?;
+    let settings = match parse_args() {
+        Ok(Some(settings)) => settings,
+        Ok(_) => return Ok(()),
+        Err(e) => return Err(e)
+    };
     // Generate puzzle
     let puzzle = Puzzle::new(settings.puzzle_settings)?;
     // Solve puzzle

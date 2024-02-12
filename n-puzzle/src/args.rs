@@ -1,4 +1,4 @@
-use anyhow::Result;
+use anyhow::{Result, anyhow};
 
 use std::env;
 
@@ -22,70 +22,85 @@ impl Settings {
         }
     }
 
-    pub fn set_algorithm(&mut self, algorithm: &str) -> () {
+    pub fn set_algorithm(&mut self, algorithm: &str) -> Result<()> {
         match algorithm {
             "astar" => self.algorithm = Algorithm::AStar,
             "uniformcost" => self.algorithm = Algorithm::UniformCost,
             "greedy" => self.algorithm = Algorithm::Greedy,
-            _ => println!("error")
+            _ => return Err(anyhow!("Not a valid algorithm: {}. Use astar, uniformcost, or greedy", algorithm))
         }
+        Ok(())
     }
 
-    pub fn set_heuristic(&mut self, heuristic: &str) {
+    pub fn set_heuristic(&mut self, heuristic: &str) -> Result<()> {
         match heuristic {
             "manhattan" => self.heuristic = Heuristic::Manhattan,
-            _ => println!("error")
+            _ => return Err(anyhow!("Not a valid heuristic: {}. Use manhattan", heuristic))
         }
+        Ok(())
     }
 
-    pub fn set_text_path(&mut self, text_path: &str) {
-        self.puzzle_settings = PuzzleSettings::TextPath(text_path.to_string())
+    pub fn set_text_path(&mut self, text_path: &str) -> Result<()> {
+        if !text_path.ends_with(".txt") {
+            return Err(anyhow!("Not a valid file format: {}. File must be in .txt format", text_path))
+        }
+        self.puzzle_settings = PuzzleSettings::TextPath(text_path.to_string());
+        Ok(())
     }
 
-    pub fn set_size(&mut self, size: &str) {
+    pub fn set_size(&mut self, size: &str) -> Result<()> {
         let size: usize = match size.trim().parse() {
-            Ok(num) => num,
-            Err(_) => 0, //println!("error");
+            Ok(num) if num > 1 => num,
+            Ok(_) => return Err(anyhow!("Not a valid size: {}. Size must be more than 1", size)),
+            Err(_) => return Err(anyhow!("Not a valid number: {}. Use numerical numbers", size))
         };
-        if size <= 0 {
-            println!("error");
-        }
-        self.puzzle_settings = PuzzleSettings::Size(size)
+        self.puzzle_settings = PuzzleSettings::Size(size);
+        Ok(())
     }
 }
 
-// TODO: change println!("error") into Err() format
-// Expected format: executable [-a algorithm] [-h heuristic] [-f file | -n size]
-pub fn parse_args() -> Result<Settings> {
-    // Parse arguments
+// Parse arguments
+// Expected format: executable (file | size) [-a algorithm] [-h heuristic]
+pub fn parse_args() -> Result<Option<Settings>> {
     let args: Vec<String> = env::args().collect();
     let len_args: usize = args.len();
     let mut settings: Settings = Settings::new(
-        PuzzleSettings::Size(3),
+        PuzzleSettings::Size(0),
         Algorithm::AStar,
         Heuristic::Manhattan
     );
 
-    //println!("-- Expected Format --");
-    //println!("usage: {} [-a algorithm] [-h heuristic] [-f file | -n size]", args[0]);
-
-    if len_args % 2 == 0 {
-        println!("error")
+    if len_args == 1 {
+        println!("usage: {} (file | size) [-a algorithm] [-h heuristic]", args[0]);
+        return Ok(None);
     }
 
-    for i in 0..((len_args - 1) / 2) {
-        let opt = args[2 * i + 1].as_str();
-        let detail = args[2 * i + 2].as_str();
-
-        match opt {
-            "-a" => settings.set_algorithm(detail),
-            "-h" => settings.set_heuristic(detail),
-            "-f" => settings.set_text_path(detail),
-            "-n" => settings.set_size(detail),
-            _ => println!("error")
+    let mut i = 1;
+    while i < len_args {
+        let arg = args[i].as_str();
+        match arg {
+            "-a" => {
+                i += 1;
+                if i == len_args {
+                    break ;
+                }
+                settings.set_algorithm(args[i].as_str())?
+            },
+            "-h" => {
+                i += 1;
+                if i == len_args {
+                    break ;
+                }
+                settings.set_heuristic(args[i].as_str())?
+            },
+            _ => match arg.trim().parse::<usize>() {
+                Ok(_) => settings.set_size(arg)?,
+                Err(_) => settings.set_text_path(arg)?,
+            }
         }
+        i += 1;
     }
 
     println!("{:?}", settings);
-    Ok(settings)
+    Ok(Some(settings))
 }
