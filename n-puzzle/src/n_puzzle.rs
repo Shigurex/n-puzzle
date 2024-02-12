@@ -23,6 +23,7 @@ pub struct Puzzle {
 }
 
 impl Puzzle {
+    /// Generate a new puzzle with PuzzleSettings
     pub fn new(settings: PuzzleSettings) -> Result<Self> {
         match settings {
             PuzzleSettings::Size(size) => Self::generate(size),
@@ -30,6 +31,7 @@ impl Puzzle {
         }
     }
 
+    /// Generate a answer puzzle with the given size
     pub fn new_answer(size: usize) -> Self {
         let mut state = vec![vec![0; size]; size];
         let mut count = 1;
@@ -43,6 +45,7 @@ impl Puzzle {
         Self { size, state, blank_pos: (size - 1, size - 1) }
     }
 
+    /// Check puzzle state
     pub fn check_state(&self) -> bool {
         let mut state = vec![false; self.size * self.size];
         if self.state.len() != self.size {
@@ -73,6 +76,7 @@ impl Puzzle {
         return true
     }
 
+    /// Checl if the puzzle is in the final state
     pub fn is_final_state(&self) -> bool {
         let mut count = 1;
         for i in 0..self.size {
@@ -89,6 +93,7 @@ impl Puzzle {
         false
     }
 
+    /// Get the value at the given position
     pub fn get(&self, i: usize, j: usize) -> Result<usize> {
         if i >= self.size || j >= self.size {
             return Err(anyhow!("Index out of bounds: ({}, {})", i, j));
@@ -96,6 +101,7 @@ impl Puzzle {
         Ok(self.state[i][j])
     }
 
+    /// Set the value at the given position without value checking
     pub fn unchecked_set(&mut self, i: usize, j: usize, val: usize) -> Result<()> {
         if i >= self.size || j >= self.size {
             return Err(anyhow!("Index out of bounds: ({}, {})", i, j));
@@ -107,6 +113,7 @@ impl Puzzle {
         Ok(())
     }
 
+    /// Set the value at the given position with value checking
     pub fn set(&mut self, i: usize, j: usize, val: usize) -> Result<()> {
         if val >= self.size * self.size {
             return Err(anyhow!("Value out of bounds: {}", val));
@@ -127,6 +134,7 @@ impl Puzzle {
         self.blank_pos
     }
 
+    /// Swap the values at the given positions
     pub fn swap(&mut self, i1: usize, j1: usize, i2: usize, j2: usize) -> Result<()> {
         if i1 >= self.size || j1 >= self.size || i2 >= self.size || j2 >= self.size {
             return Err(anyhow!("Index out of bounds: ({}, {}), ({}, {})", i1, j1, i2, j2));
@@ -143,6 +151,7 @@ impl Puzzle {
         Ok(())
     }
 
+    /// Move the blank position
     pub fn move_blank(&mut self, mv: Move) -> Result<()> {
         let (i, j) = self.blank_pos;
         match mv {
