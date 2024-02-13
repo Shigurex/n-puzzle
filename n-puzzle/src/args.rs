@@ -6,7 +6,7 @@ use super::{
     PuzzleSettings, Algorithm, Heuristic,
 };
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub struct Settings {
     pub puzzle_settings: PuzzleSettings,
     pub algorithm: Option<Algorithm>,
@@ -144,4 +144,19 @@ pub fn parse_args(args: Vec<String>) -> Result<Option<Settings>> {
 
     settings.apply_default_setting()?;
     Ok(Some(settings))
+}
+
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_parse_args() -> Result<()> {
+        let args: Vec<String> = vec!["target/debug/n-puzzle".into(), "2".into()];
+        let settings = parse_args(args)?.unwrap();
+        let answer_settings = Settings::new(PuzzleSettings::Size(2), Some(Algorithm::AStar), Heuristic::Manhattan);
+        assert_eq!(settings, answer_settings);
+        Ok(())
+    }
 }
