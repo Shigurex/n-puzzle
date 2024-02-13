@@ -82,14 +82,14 @@ pub fn parse_args() -> Result<Option<Settings>> {
             "-a" => {
                 i += 1;
                 if i == len_args {
-                    break ;
+                    return Err(anyhow!("Need an algorithm: Use astar, uniformcost, or greedy"))
                 }
                 settings.set_algorithm(args[i].as_str())?
             },
             "-h" => {
                 i += 1;
                 if i == len_args {
-                    break ;
+                    return Err(anyhow!("Need a heuristic: Use manhattan"))
                 }
                 settings.set_heuristic(args[i].as_str())?
             },
