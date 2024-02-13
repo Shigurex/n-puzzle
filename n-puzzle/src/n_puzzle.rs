@@ -1,5 +1,8 @@
+mod pos;
 mod parser;
 mod generator;
+
+pub use pos::Pos;
 
 use anyhow::{Result, anyhow};
 
@@ -19,7 +22,7 @@ pub enum Move {
 pub struct Puzzle {
     size: usize,
     state: Vec<Vec<usize>>,
-    blank_pos: (usize, usize),
+    blank_pos: Pos,
 }
 
 impl Puzzle {
@@ -42,7 +45,7 @@ impl Puzzle {
             }
         }
         state[size - 1][size - 1] = 0;
-        Self { size, state, blank_pos: (size - 1, size - 1) }
+        Self { size, state, blank_pos: Pos::new(size - 1, size - 1) }
     }
 
     /// Check puzzle state
@@ -66,7 +69,7 @@ impl Puzzle {
             }
         }
         // Check blank position
-        let val = match self.get(self.blank_pos.0, self.blank_pos.1) {
+        let val = match self.get(self.blank_pos) {
             Ok(val) => val,
             Err(_) => return false,
         };
@@ -94,27 +97,27 @@ impl Puzzle {
     }
 
     /// Get the value at the given position
-    pub fn get(&self, i: usize, j: usize) -> Result<usize> {
-        if i >= self.size || j >= self.size {
-            return Err(anyhow!("Index out of bounds: ({}, {})", i, j));
+    pub fn get(&self, pos: Pos) -> Result<usize> {
+        if pos.x >= self.size || pos.y >= self.size {
+            return Err(anyhow!("Index out of bounds: ({}, {})", pos.x, pos.y));
         }
-        Ok(self.state[i][j])
+        Ok(self.state[pos.y][pos.x])
     }
 
     /// Set the value at the given position without value checking
-    pub fn unchecked_set(&mut self, i: usize, j: usize, val: usize) -> Result<()> {
-        if i >= self.size || j >= self.size {
-            return Err(anyhow!("Index out of bounds: ({}, {})", i, j));
+    pub fn unchecked_set(&mut self, pos: Pos, val: usize) -> Result<()> {
+        if pos.x >= self.size || pos.y >= self.size {
+            return Err(anyhow!("Index out of bounds: ({}, {})", pos.x, pos.y));
         }
-        self.state[i][j] = val;
+        self.state[pos.y][pos.x] = val;
         if val == 0 {
-            self.blank_pos = (i, j);
+            self.blank_pos = pos;
         }
         Ok(())
     }
 
     /// Set the value at the given position with value checking
-    pub fn set(&mut self, i: usize, j: usize, val: usize) -> Result<()> {
+    pub fn set(&mut self, pos: Pos, val: usize) -> Result<()> {
         if val >= self.size * self.size {
             return Err(anyhow!("Value out of bounds: {}", val));
         }
@@ -123,61 +126,61 @@ impl Puzzle {
                 return Err(anyhow!("Value already exists: {}", val));
             }
         }
-        self.unchecked_set(i, j, val)
+        self.unchecked_set(pos, val)
     }
 
     pub fn get_size(&self) -> usize {
         self.size
     }
 
-    pub fn get_blank_pos(&self) -> (usize, usize) {
+    pub fn get_blank_pos(&self) -> Pos {
         self.blank_pos
     }
 
     /// Swap the values at the given positions
-    pub fn swap(&mut self, i1: usize, j1: usize, i2: usize, j2: usize) -> Result<()> {
-        if i1 >= self.size || j1 >= self.size || i2 >= self.size || j2 >= self.size {
-            return Err(anyhow!("Index out of bounds: ({}, {}), ({}, {})", i1, j1, i2, j2));
+    pub fn swap(&mut self, pos1: Pos, pos2: Pos) -> Result<()> {
+        if pos1.x >= self.size || pos1.y >= self.size || pos2.x >= self.size || pos2.y >= self.size {
+            return Err(anyhow!("Index out of bounds: ({}, {}), ({}, {})", pos1.x, pos1.y, pos2.x, pos2.y));
         }
-        let val1 = self.get(i1, j1)?;
-        let val2 = self.get(i2, j2)?;
-        self.state[i1][j1] = val2;
-        self.state[i2][j2] = val1;
+        let val1 = self.get(pos1)?;
+        let val2 = self.get(pos2)?;
+        self.state[pos1.y][pos1.x] = val2;
+        self.state[pos2.y][pos2.x] = val1;
         if val1 == 0 {
-            self.blank_pos = (i2, j2);
+            self.blank_pos = pos2;
         } else if val2 == 0 {
-            self.blank_pos = (i1, j1);
+            self.blank_pos = pos1;
         }
         Ok(())
     }
 
     /// Move the blank position
     pub fn move_blank(&mut self, mv: Move) -> Result<()> {
-        let (i, j) = self.blank_pos;
+        let pos = self.blank_pos;
         match mv {
             Move::Up => {
-                if i == 0 {
+                if pos.y == 0 {
                     return Err(anyhow!("Cannot move up"));
                 }
-                self.swap(i, j, i - 1, j)?;
+                self.swap(pos, pos - Pos::new(0, 1))?;
             },
             Move::Down => {
-                if i == self.size - 1 {
+                if pos.y == self.size - 1 {
                     return Err(anyhow!("Cannot move down"));
                 }
-                self.swap(i, j, i + 1, j)?;
+                self.swap(pos, pos + Pos::new(0, 1))?;
             },
             Move::Left => {
-                if j == 0 {
+                if pos.x == 0 {
                     return Err(anyhow!("Cannot move left"));
                 }
-                self.swap(i, j, i, j - 1)?;
+                self.swap(pos, pos - Pos::new(1, 0))?;
             },
             Move::Right => {
-                if j == self.size - 1 {
+                if pos.x == self.size - 1 {
                     return Err(anyhow!("Cannot move right"));
                 }
-                self.swap(i, j, i, j + 1)?;
+                self.swap(pos, pos + Pos::new(1, 0))?;
             },
         }
         Ok(())
@@ -233,7 +236,7 @@ mod tests {
         assert_eq!(puzzle.check_state(), false);
         puzzle.state[0][0] = 1;
         // Case where the blank position is not correct
-        puzzle.blank_pos = (0, 0);
+        puzzle.blank_pos = Pos::new(0, 0);
         assert_eq!(puzzle.check_state(), false);
     }
 
@@ -248,25 +251,25 @@ mod tests {
     #[test]
     fn test_get() {
         let puzzle = Puzzle::new_answer(3);
-        assert_eq!(puzzle.get(0, 0).unwrap(), 1);
-        assert_eq!(puzzle.get(1, 1).unwrap(), 5);
-        assert_eq!(puzzle.get(2, 2).unwrap(), 0);
-        assert!(puzzle.get(3, 0).is_err());
-        assert!(puzzle.get(0, 3).is_err());
+        assert_eq!(puzzle.get(Pos::new(0, 0)).unwrap(), 1);
+        assert_eq!(puzzle.get(Pos::new(1, 2)).unwrap(), 8);
+        assert_eq!(puzzle.get(Pos::new(2, 2)).unwrap(), 0);
+        assert!(puzzle.get(Pos::new(3, 0)).is_err());
+        assert!(puzzle.get(Pos::new(0, 3)).is_err());
     }
 
     #[test]
     fn test_unchecked_set() {
         let mut puzzle = Puzzle::new_answer(3);
-        puzzle.unchecked_set(0, 0, 9).unwrap();
+        puzzle.unchecked_set(Pos::new(0, 0), 9).unwrap();
         assert_eq!(puzzle.state[0][0], 9);
-        puzzle.unchecked_set(2, 2, 1).unwrap();
+        puzzle.unchecked_set(Pos::new(2, 2), 1).unwrap();
         assert_eq!(puzzle.state[2][2], 1);
-        puzzle.unchecked_set(2, 0, 0).unwrap();
+        puzzle.unchecked_set(Pos::new(0, 2), 0).unwrap();
         assert_eq!(puzzle.state[2][0], 0);
-        assert_eq!(puzzle.blank_pos, (2, 0));
-        assert!(puzzle.unchecked_set(3, 0, 1).is_err());
-        assert!(puzzle.unchecked_set(0, 3, 1).is_err());
+        assert_eq!(puzzle.blank_pos, Pos::new(0, 2));
+        assert!(puzzle.unchecked_set(Pos::new(3, 0), 2).is_err());
+        assert!(puzzle.unchecked_set(Pos::new(0, 3), 3).is_err());
     }
 
     #[test]
@@ -274,31 +277,31 @@ mod tests {
         let mut puzzle = Puzzle {
             size: 3,
             state: vec![vec![0; 3]; 3],
-            blank_pos: (2, 2),
+            blank_pos: Pos::new(2, 2),
         };
-        puzzle.set(0, 0, 1).unwrap();
+        puzzle.set(Pos::new(0, 0), 1).unwrap();
         assert_eq!(puzzle.state[0][0], 1);
-        puzzle.set(2, 2, 2).unwrap();
+        puzzle.set(Pos::new(2, 2), 2).unwrap();
         assert_eq!(puzzle.state[2][2], 2);
-        assert!(puzzle.set(0, 0, 2).is_err());
-        assert!(puzzle.set(0, 0, 10).is_err());
-        assert!(puzzle.set(3, 0, 3).is_err());
-        assert!(puzzle.set(0, 3, 4).is_err());
+        assert!(puzzle.set(Pos::new(0, 0), 2).is_err());
+        assert!(puzzle.set(Pos::new(0, 0), 10).is_err());
+        assert!(puzzle.set(Pos::new(0, 3), 3).is_err());
+        assert!(puzzle.set(Pos::new(3, 0), 3).is_err());
     }
 
     #[test]
     fn test_swap() {
         let mut puzzle = Puzzle::new_answer(3);
-        puzzle.swap(0, 0, 2, 2).unwrap();
+        puzzle.swap(Pos::new(0, 0), Pos::new(2, 2)).unwrap();
         assert_eq!(puzzle.state[0][0], 0);
         assert_eq!(puzzle.state[2][2], 1);
-        assert_eq!(puzzle.blank_pos, (0, 0));
-        puzzle.swap(0, 0, 2, 2).unwrap();
+        assert_eq!(puzzle.blank_pos, Pos::new(0, 0));
+        puzzle.swap(Pos::new(0, 0), Pos::new(2, 2)).unwrap();
         assert_eq!(puzzle.state[0][0], 1);
         assert_eq!(puzzle.state[2][2], 0);
-        assert_eq!(puzzle.blank_pos, (2, 2));
-        assert!(puzzle.swap(3, 0, 0, 0).is_err());
-        assert!(puzzle.swap(0, 0, 0, 3).is_err());
+        assert_eq!(puzzle.blank_pos, Pos::new(2, 2));
+        assert!(puzzle.swap(Pos::new(0, 3), Pos::new(0, 0)).is_err());
+        assert!(puzzle.swap(Pos::new(0, 0), Pos::new(3, 0)).is_err());
     }
 
     #[test]
