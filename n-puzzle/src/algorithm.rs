@@ -5,13 +5,13 @@ mod greedy;
 use anyhow::Result;
 use super::Puzzle;
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub enum Heuristic {
     Manhattan,
     None,
 }
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub enum Algorithm {
     AStar,
     UniformCost,

@@ -6,6 +6,7 @@ pub use pos::Pos;
 
 use anyhow::{Result, anyhow};
 
+#[derive(Debug, PartialEq)]
 pub enum PuzzleSettings {
     Size(usize),
     TextPath(String),
