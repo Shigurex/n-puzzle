@@ -152,11 +152,41 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_parse_args() -> Result<()> {
+    fn test_size_normal() -> Result<()> {
         let args: Vec<String> = vec!["target/debug/n-puzzle".into(), "2".into()];
         let settings = parse_args(args)?.unwrap();
         let answer_settings = Settings::new(PuzzleSettings::Size(2), Some(Algorithm::AStar), Heuristic::Manhattan);
         assert_eq!(settings, answer_settings);
         Ok(())
     }
+
+    //#[test]
+    //fn test_size_zero() -> Result<()> {
+    //    let args: Vec<String> = vec!["target/debug/n-puzzle".into(), "0".into()];
+    //    let settings = match parse_args(args) {
+    //        Err(e) => Err(e),
+    //        _ => return Err(anyhow!("invalid"))
+    //    };
+    //    let answer_settings = Err(anyhow!("Not a valid size: {}. Size must be more than 1", 0));
+    //    assert_eq!(settings, answer_settings);
+    //    Ok(())
+    //}
+
+    //#[test]
+    //fn test_size_one() -> Result<()> {
+    //    let args: Vec<String> = vec!["target/debug/n-puzzle".into(), "1".into()];
+    //    let settings = parse_args(args)?.unwrap();
+    //    let answer_settings = Settings::new(PuzzleSettings::Size(1), Some(Algorithm::AStar), Heuristic::Manhattan);
+    //    assert_eq!(settings, answer_settings);
+    //    Ok(())
+    //}
+
+    //#[test]
+    //fn test_size_one() -> Result<()> {
+    //    let args: Vec<String> = vec!["target/debug/n-puzzle".into(), "2".into()];
+    //    let settings = parse_args(args)?.unwrap();
+    //    let answer_settings = Settings::new(PuzzleSettings::Size(1), Some(Algorithm::AStar), Heuristic::Manhattan);
+    //    assert_eq!(settings, answer_settings);
+    //    Ok(())
+    //}
 }
