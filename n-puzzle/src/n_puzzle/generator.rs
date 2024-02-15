@@ -1,7 +1,6 @@
 use anyhow::{Result, anyhow};
 use rand::seq::SliceRandom;
-use super::Puzzle;
-use super::pos::Pos;
+use super::{Puzzle, Pos};
 
 impl Puzzle {
     pub(super) fn generate(size: usize) -> Result<Self> {
