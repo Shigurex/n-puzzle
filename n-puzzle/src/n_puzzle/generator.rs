@@ -33,8 +33,7 @@ mod tests {
     #[test]
     fn test_generate_border() {
         let puzzle = Puzzle::generate(2).unwrap();
-        let result = puzzle.check_state();
-        assert_eq!(result, true);
+        assert!(puzzle.check_state());
     }
 
     #[test]
