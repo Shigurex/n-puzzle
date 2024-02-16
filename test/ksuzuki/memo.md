@@ -64,14 +64,15 @@ https://n-puzzle.baletskyi.me/
 7 8 0
 ```
 
-## 役割
+## 参考
 
-- 全体の構成: ksuzuki
-- 引数の管理
-    - ライブラリ：clap
-- テキストファイル
-- n puzzleの作成
-- アルゴリズム
-    - A*探索アルゴリズム
-    - 均一コスト探索
-    - 貪欲法
+- n-puzzleについて
+    - https://manabitimes.jp/math/979
+    - https://y-uti.hatenablog.jp/entry/2015/04/29/103422
+- A-star
+    - https://ja.wikipedia.org/wiki/A*
+    - http://tsumulab.org/papers/pdf/degree/2009_bachelor_oozaki.pdf
+- 均一コスト探索
+    - https://ja.wikipedia.org/wiki/%E5%9D%87%E4%B8%80%E3%82%B3%E3%82%B9%E3%83%88%E6%8E%A2%E7%B4%A2
+- 貪欲法
+    - https://ja.wikipedia.org/wiki/%E8%B2%AA%E6%AC%B2%E6%B3%95
