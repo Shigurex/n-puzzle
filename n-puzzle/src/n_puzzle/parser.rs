@@ -15,7 +15,7 @@ impl Puzzle {
         }).collect::<Vec<&str>>().join(" ");
         let mut elements: Vec<&str> = text_without_comments.split_whitespace().collect();
 
-        let size = match elements.first() {
+        let size: &str = match elements.first() {
             Some(&elem) => elem,
             None => return Err(anyhow!("Cannot find the size.")),
         };
@@ -36,6 +36,11 @@ impl Puzzle {
                 blank_pos.y = pos.y;
             }
         }
-        Ok(Self { size, state, blank_pos })
+
+        let puzzle = Self { size, state, blank_pos };
+        if puzzle.check_state() == false {
+            return Err(anyhow!("Invalid puzzle format."))
+        }
+        Ok(puzzle)
     }
 }
