@@ -18,6 +18,15 @@ pub enum Algorithm {
     Greedy,
 }
 
+impl Algorithm {
+    pub fn is_heuristic(&self) -> bool {
+        if let Algorithm::UniformCost = self {
+            return false
+        }
+        return true
+    }
+}
+
 #[derive(Debug)]
 pub struct Output {}
 
