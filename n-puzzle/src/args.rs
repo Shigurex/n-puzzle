@@ -93,10 +93,12 @@ impl Settings {
         match self.heuristic {
             Heuristic::None => match self.algorithm {
                 Some(Algorithm::AStar) => self.heuristic = Heuristic::Manhattan,
+                Some(Algorithm::Greedy) => self.heuristic = Heuristic::Manhattan,
                 _ => {}
             },
             _ => match self.algorithm {
                 Some(Algorithm::AStar) => {},
+                Some(Algorithm::Greedy) => {}
                 _ => return Err(anyhow!("Heuristic specified for algorithm other than astar."))
             },
         }
@@ -216,7 +218,7 @@ mod tests {
     fn test_algorithm_greedy() -> Result<()> {
         let args: Vec<String> = vec!["target/debug/n-puzzle".into(), "3".into(), "-a".into(), "greedy".into()];
         let settings = parse_args(args)?.unwrap();
-        let answer_settings = Settings::new(PuzzleSettings::Size(3), Some(Algorithm::Greedy), Heuristic::None);
+        let answer_settings = Settings::new(PuzzleSettings::Size(3), Some(Algorithm::Greedy), Heuristic::Manhattan);
         assert_eq!(settings, answer_settings);
         Ok(())
     }
@@ -254,10 +256,12 @@ mod tests {
     }
 
     #[test]
-    fn test_greedy_with_heuristic() {
+    fn test_greedy_with_heuristic() -> Result<()> {
         let args: Vec<String> = vec!["target/debug/n-puzzle".into(), "3".into(), "-a".into(), "greedy".into(), "-h".into(), "manhattan".into()];
-        let settings = parse_args(args);
-        assert!(settings.is_err());
+        let settings = parse_args(args)?.unwrap();
+        let answer_settings = Settings::new(PuzzleSettings::Size(3), Some(Algorithm::Greedy), Heuristic::Manhattan);
+        assert_eq!(settings, answer_settings);
+        Ok(())
     }
 
     #[test]
