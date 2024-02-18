@@ -11,14 +11,16 @@ pub struct Settings {
     pub puzzle_settings: PuzzleSettings,
     pub algorithm: Option<Algorithm>,
     pub heuristic: Heuristic,
+    pub verbose: bool,
 }
 
 impl Settings {
-    pub fn new(puzzle_settings: PuzzleSettings, algorithm: Option<Algorithm>, heuristic: Heuristic) -> Self {
+    pub fn new(puzzle_settings: PuzzleSettings, algorithm: Option<Algorithm>, heuristic: Heuristic, verbose: bool) -> Self {
         Self {
             puzzle_settings,
             algorithm,
-            heuristic
+            heuristic,
+            verbose,
         }
     }
 
@@ -26,7 +28,8 @@ impl Settings {
         Self::new(
             PuzzleSettings::Size(0),
             None,
-            Heuristic::None
+            Heuristic::None,
+            false,
         )
     }
 
@@ -137,6 +140,7 @@ pub fn parse_args(args: Vec<String>) -> Result<Option<Settings>> {
                 }
                 settings.set_heuristic(args[i].as_str())?
             },
+            "--verbose" => settings.verbose = true,
             _ => match arg.trim().parse::<usize>() {
                 Ok(_) => settings.set_size(arg)?,
                 Err(_) => settings.set_text_path(arg)?,
@@ -158,7 +162,7 @@ mod tests {
     fn test_size_normal() -> Result<()> {
         let args: Vec<String> = vec!["target/debug/n-puzzle".into(), "2".into()];
         let settings = parse_args(args)?.unwrap();
-        let answer_settings = Settings::new(PuzzleSettings::Size(2), Some(Algorithm::AStar), Heuristic::Manhattan);
+        let answer_settings = Settings::new(PuzzleSettings::Size(2), Some(Algorithm::AStar), Heuristic::Manhattan, false);
         assert_eq!(settings, answer_settings);
         Ok(())
     }
@@ -181,7 +185,7 @@ mod tests {
     fn test_text_path_valid() -> Result<()> {
         let args: Vec<String> = vec!["target/debug/n-puzzle".into(), "test.txt".into()];
         let settings = parse_args(args)?.unwrap();
-        let answer_settings = Settings::new(PuzzleSettings::TextPath("test.txt".into()), Some(Algorithm::AStar), Heuristic::Manhattan);
+        let answer_settings = Settings::new(PuzzleSettings::TextPath("test.txt".into()), Some(Algorithm::AStar), Heuristic::Manhattan, false);
         assert_eq!(settings, answer_settings);
         Ok(())
     }
@@ -197,7 +201,7 @@ mod tests {
     fn test_algorithm_astar() -> Result<()> {
         let args: Vec<String> = vec!["target/debug/n-puzzle".into(), "3".into(), "-a".into(), "astar".into()];
         let settings = parse_args(args)?.unwrap();
-        let answer_settings = Settings::new(PuzzleSettings::Size(3), Some(Algorithm::AStar), Heuristic::Manhattan);
+        let answer_settings = Settings::new(PuzzleSettings::Size(3), Some(Algorithm::AStar), Heuristic::Manhattan, false);
         assert_eq!(settings, answer_settings);
         Ok(())
     }
@@ -206,7 +210,7 @@ mod tests {
     fn test_algorithm_uniformcost() -> Result<()> {
         let args: Vec<String> = vec!["target/debug/n-puzzle".into(), "3".into(), "-a".into(), "uniformcost".into()];
         let settings = parse_args(args)?.unwrap();
-        let answer_settings = Settings::new(PuzzleSettings::Size(3), Some(Algorithm::UniformCost), Heuristic::None);
+        let answer_settings = Settings::new(PuzzleSettings::Size(3), Some(Algorithm::UniformCost), Heuristic::None, false);
         assert_eq!(settings, answer_settings);
         Ok(())
     }
@@ -215,7 +219,7 @@ mod tests {
     fn test_algorithm_greedy() -> Result<()> {
         let args: Vec<String> = vec!["target/debug/n-puzzle".into(), "3".into(), "-a".into(), "greedy".into()];
         let settings = parse_args(args)?.unwrap();
-        let answer_settings = Settings::new(PuzzleSettings::Size(3), Some(Algorithm::Greedy), Heuristic::Manhattan);
+        let answer_settings = Settings::new(PuzzleSettings::Size(3), Some(Algorithm::Greedy), Heuristic::Manhattan, false);
         assert_eq!(settings, answer_settings);
         Ok(())
     }
@@ -231,7 +235,7 @@ mod tests {
     fn test_heuristic_manhattan() -> Result<()> {
         let args: Vec<String> = vec!["target/debug/n-puzzle".into(), "3".into(), "-h".into(), "manhattan".into()];
         let settings = parse_args(args)?.unwrap();
-        let answer_settings = Settings::new(PuzzleSettings::Size(3), Some(Algorithm::AStar), Heuristic::Manhattan);
+        let answer_settings = Settings::new(PuzzleSettings::Size(3), Some(Algorithm::AStar), Heuristic::Manhattan, false);
         assert_eq!(settings, answer_settings);
         Ok(())
     }
@@ -247,7 +251,7 @@ mod tests {
     fn test_astar_with_heuristic() -> Result<()> {
         let args: Vec<String> = vec!["target/debug/n-puzzle".into(), "3".into(), "-a".into(), "astar".into(), "-h".into(), "manhattan".into()];
         let settings = parse_args(args)?.unwrap();
-        let answer_settings = Settings::new(PuzzleSettings::Size(3), Some(Algorithm::AStar), Heuristic::Manhattan);
+        let answer_settings = Settings::new(PuzzleSettings::Size(3), Some(Algorithm::AStar), Heuristic::Manhattan, false);
         assert_eq!(settings, answer_settings);
         Ok(())
     }
@@ -256,7 +260,7 @@ mod tests {
     fn test_greedy_with_heuristic() -> Result<()> {
         let args: Vec<String> = vec!["target/debug/n-puzzle".into(), "3".into(), "-a".into(), "greedy".into(), "-h".into(), "manhattan".into()];
         let settings = parse_args(args)?.unwrap();
-        let answer_settings = Settings::new(PuzzleSettings::Size(3), Some(Algorithm::Greedy), Heuristic::Manhattan);
+        let answer_settings = Settings::new(PuzzleSettings::Size(3), Some(Algorithm::Greedy), Heuristic::Manhattan, false);
         assert_eq!(settings, answer_settings);
         Ok(())
     }
@@ -272,7 +276,7 @@ mod tests {
     fn test_complex_valid_middle() -> Result<()> {
         let args: Vec<String> = vec!["target/debug/n-puzzle".into(), "-a".into(), "astar".into(), "test.txt".into(), "-h".into(), "manhattan".into()];
         let settings = parse_args(args)?.unwrap();
-        let answer_settings = Settings::new(PuzzleSettings::TextPath("test.txt".into()), Some(Algorithm::AStar), Heuristic::Manhattan);
+        let answer_settings = Settings::new(PuzzleSettings::TextPath("test.txt".into()), Some(Algorithm::AStar), Heuristic::Manhattan, false);
         assert_eq!(settings, answer_settings);
         Ok(())
     }
@@ -281,7 +285,7 @@ mod tests {
     fn test_complex_valid_end() -> Result<()> {
         let args: Vec<String> = vec!["target/debug/n-puzzle".into(), "-a".into(), "astar".into(), "-h".into(), "manhattan".into(), "test.txt".into()];
         let settings = parse_args(args)?.unwrap();
-        let answer_settings = Settings::new(PuzzleSettings::TextPath("test.txt".into()), Some(Algorithm::AStar), Heuristic::Manhattan);
+        let answer_settings = Settings::new(PuzzleSettings::TextPath("test.txt".into()), Some(Algorithm::AStar), Heuristic::Manhattan, false);
         assert_eq!(settings, answer_settings);
         Ok(())
     }
@@ -291,5 +295,14 @@ mod tests {
         let args: Vec<String> = vec!["target/debug/n-puzzle".into(), "-a".into(), "-h".into(), "manhattan".into(), "test.txt".into()];
         let settings = parse_args(args);
         assert!(settings.is_err());
+    }
+
+    #[test]
+    fn test_verbose() -> Result<()> {
+        let args: Vec<String> = vec!["target/debug/n-puzzle".into(), "-a".into(), "astar".into(), "-h".into(), "manhattan".into(), "test.txt".into(), "--verbose".into()];
+        let settings = parse_args(args)?.unwrap();
+        let answer_settings = Settings::new(PuzzleSettings::TextPath("test.txt".into()), Some(Algorithm::AStar), Heuristic::Manhattan, true);
+        assert_eq!(settings, answer_settings);
+        Ok(())
     }
 }
