@@ -91,15 +91,11 @@ impl Settings {
             self.algorithm = Some(Algorithm::AStar);
         }
         match self.heuristic {
-            Heuristic::None => match self.algorithm {
-                Some(Algorithm::AStar) => self.heuristic = Heuristic::Manhattan,
-                Some(Algorithm::Greedy) => self.heuristic = Heuristic::Manhattan,
-                _ => {}
+            Heuristic::None => if self.algorithm.unwrap().is_heuristic() {
+                self.heuristic = Heuristic::Manhattan;
             },
-            _ => match self.algorithm {
-                Some(Algorithm::AStar) => {},
-                Some(Algorithm::Greedy) => {}
-                _ => return Err(anyhow!("Heuristic specified for algorithm other than astar."))
+            _ => if !self.algorithm.unwrap().is_heuristic() {
+                return Err(anyhow!("Heuristic specified for algorithm other than astar."))
             },
         }
         Ok(())
