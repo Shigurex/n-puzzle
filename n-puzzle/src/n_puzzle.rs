@@ -12,6 +12,7 @@ pub enum PuzzleSettings {
     TextPath(String),
 }
 
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub enum Move {
     Up,
     Down,
@@ -19,7 +20,7 @@ pub enum Move {
     Right,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct Puzzle {
     size: usize,
     state: Vec<Vec<usize>>,
@@ -33,6 +34,24 @@ impl Puzzle {
             PuzzleSettings::Size(size) => Self::generate(size),
             PuzzleSettings::TextPath(text_path) => Self::parse_text(text_path),
         }
+    }
+
+    pub fn new_from_state(state: Vec<Vec<usize>>) -> Result<Self> {
+        let size = state.len();
+        let mut blank_pos = Pos::new(0, 0);
+        'outer: for (y, row) in state.iter().enumerate() {
+            for (x, val) in row.iter().enumerate() {
+                if *val == 0 {
+                    blank_pos = Pos::new(x, y);
+                    break 'outer;
+                }
+            }
+        }
+        let puzzle = Self { size, state, blank_pos };
+        if !puzzle.check_state() {
+            return Err(anyhow!("Invalid state"));
+        }
+        Ok(puzzle)
     }
 
     /// Generate a answer puzzle with the given size

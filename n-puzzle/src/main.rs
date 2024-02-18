@@ -2,7 +2,7 @@ mod args;
 mod n_puzzle;
 mod algorithm;
 
-pub use n_puzzle::{PuzzleSettings, Puzzle};
+pub use n_puzzle::{PuzzleSettings, Puzzle, Move};
 pub use algorithm::{Algorithm, Heuristic};
 
 use anyhow::Result;
@@ -21,7 +21,7 @@ fn run() -> Result<()> {
     let puzzle = Puzzle::new(settings.puzzle_settings)?;
     // Solve puzzle
     let solver = Solver::new(settings.algorithm.unwrap(), settings.heuristic, puzzle);
-    solver.solve()?;
+    solver.solve(true)?;
     Ok(())
 }
 
