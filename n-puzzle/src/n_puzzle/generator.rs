@@ -27,6 +27,7 @@ impl Puzzle {
     }
 }
 
+#[cfg(test)]
 mod tests {
     use super::*;
 
@@ -41,5 +42,11 @@ mod tests {
         let puzzle = Puzzle::generate(5).unwrap();
         let result = puzzle.check_state();
         assert_eq!(result, true);
+    }
+
+    #[test]
+    fn test_generate_invalid() {
+        let puzzle = Puzzle::generate(1);
+        assert!(puzzle.is_err());
     }
 }
