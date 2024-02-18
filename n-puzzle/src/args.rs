@@ -90,12 +90,13 @@ impl Settings {
         if let None = self.algorithm {
             self.algorithm = Some(Algorithm::AStar);
         }
+        let is_huristic = self.algorithm.unwrap().is_heuristic();
         match self.heuristic {
-            Heuristic::None => if self.algorithm.unwrap().is_heuristic() {
+            Heuristic::None => if is_huristic {
                 self.heuristic = Heuristic::Manhattan;
             },
-            _ => if !self.algorithm.unwrap().is_heuristic() {
-                return Err(anyhow!("Heuristic specified for algorithm other than astar."))
+            _ => if !is_huristic {
+                return Err(anyhow!("Heuristic specified for algorithm that doesn't need heuristic."))
             },
         }
         Ok(())
