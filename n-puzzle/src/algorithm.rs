@@ -148,4 +148,21 @@ Number of moves: 1
 ");
         Ok(())
     }
+
+    #[test]
+    fn test_output_non_verbose() -> Result<()> {
+        let output = Output::new(
+            1,
+            1,
+            vec![Move::Up, Move::Left]
+        );
+        let text = output.get_result_string(None)?;
+        assert_eq!(text,
+"Complexity in time: 1
+Complexity in size: 1
+Number of moves: 2
+Up Left 
+");
+        Ok(())
+    }
 }
