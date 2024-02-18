@@ -8,6 +8,9 @@ debug:
 	@cd n-puzzle && cargo build
 	@cp n-puzzle/target/debug/n-puzzle ./$(NAME)
 
+test:
+	@cd n-puzzle && cargo test
+
 $(NAME): release
 
 all: release
@@ -20,4 +23,4 @@ fclean: clean
 
 re: fclean all
 
-.PHONY: all clean fclean re release debug
+.PHONY: all clean fclean re release debug test
