@@ -23,7 +23,7 @@ impl Algorithm {
         if let Algorithm::UniformCost = self {
             return false
         }
-        return true
+        true
     }
 }
 

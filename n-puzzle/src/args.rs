@@ -86,11 +86,10 @@ impl Settings {
     }
 
     pub fn apply_default_setting(&mut self) -> Result<()> {
-        match self.puzzle_settings {
-            PuzzleSettings::Size(0) => return Err(anyhow!("Need size or text_path.")),
-            _ => {}
+        if let PuzzleSettings::Size(0) = self.puzzle_settings {
+            return Err(anyhow!("Need size or text_path."))
         }
-        if let None = self.algorithm {
+        if self.algorithm.is_none() {
             self.algorithm = Some(Algorithm::AStar);
         }
         let is_huristic = self.algorithm.unwrap().is_heuristic();

@@ -9,8 +9,8 @@ impl Pos {
         Self { x, y }
     }
 
-    pub fn to_tuple(&self) -> (usize, usize) {
-        let x: Vec<String> = vec!["x", "y"]
+    pub fn as_tuple(&self) -> (usize, usize) {
+        let x: Vec<String> = ["x", "y"]
             .iter()
             .map(|s| s.to_string())
             .collect();

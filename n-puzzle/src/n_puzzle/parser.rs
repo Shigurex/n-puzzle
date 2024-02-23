@@ -8,7 +8,7 @@ impl Puzzle {
     pub(super) fn parse_text(text_path: String) -> Result<Self> {
         let text = fs::read_to_string(text_path)?;
         let text_without_comments: String = text.lines().map(|line| {
-            match line.find("#") {
+            match line.find('#') {
                 Some(index) => &line[0..index],
                 _ => line
             }
@@ -38,7 +38,7 @@ impl Puzzle {
         }
 
         let puzzle = Self { size, state, blank_pos };
-        if puzzle.check_state() == false {
+        if !puzzle.check_state() {
             return Err(anyhow!("Invalid puzzle format."))
         }
         Ok(puzzle)

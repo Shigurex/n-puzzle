@@ -11,6 +11,15 @@ debug:
 test:
 	@cd n-puzzle && cargo test
 
+lint:
+	@cd n-puzzle && cargo clippy --all-targets --all-features
+
+fmt-check:
+	@cd n-puzzle && cargo fmt --all --check
+
+fmt:
+	@cd n-puzzle && cargo fmt --all
+
 $(NAME): release
 
 all: release

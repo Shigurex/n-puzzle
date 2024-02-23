@@ -41,7 +41,7 @@ mod tests {
     fn test_generate_normal() {
         let puzzle = Puzzle::generate(5).unwrap();
         let result = puzzle.check_state();
-        assert_eq!(result, true);
+        assert!(result);
     }
 
     #[test]

@@ -58,9 +58,9 @@ impl Puzzle {
     pub fn new_answer(size: usize) -> Self {
         let mut state = vec![vec![0; size]; size];
         let mut count = 1;
-        for i in 0..size {
-            for j in 0..size {
-                state[i][j] = count;
+        for row in &mut state {
+            for val in row {
+                *val = count;
                 count += 1;
             }
         }
@@ -96,7 +96,7 @@ impl Puzzle {
         if val != 0 {
             return false;
         }
-        return true
+        true
     }
 
     /// Checl if the puzzle is in the final state
@@ -105,7 +105,7 @@ impl Puzzle {
         for i in 0..self.size {
             for j in 0..self.size {
                 if count == self.size * self.size {
-                    return true;
+                    break
                 }
                 if self.state[i][j] != count {
                     return false;
@@ -113,7 +113,7 @@ impl Puzzle {
                 count += 1;
             }
         }
-        false
+        true
     }
 
     /// Get the value at the given position
@@ -216,7 +216,7 @@ impl std::fmt::Display for Puzzle {
                 }
                 write!(f, "{}", val)?;
             }
-            write!(f, "\n")?;
+            writeln!(f)?;
         }
         Ok(())
     }
@@ -236,36 +236,36 @@ mod tests {
     #[test]
     fn test_check_state() {
         let mut puzzle = Puzzle::new_answer(3);
-        assert_eq!(puzzle.check_state(), true);
+        assert!(puzzle.check_state());
         // Case where a value is duplicated
         puzzle.state[0][0] = 0;
-        assert_eq!(puzzle.check_state(), false);
+        assert!(!puzzle.check_state());
         puzzle.state[0][0] = 1;
         // Case where the line length is not equal to the size
         puzzle.state.pop();
         puzzle.state.push(vec![8, 9]);
-        assert_eq!(puzzle.check_state(), false);
+        assert!(!puzzle.check_state());
         puzzle.state.pop();
         puzzle.state.push(vec![8, 9, 0]);
         // Case where the column length is not equal to the size
         puzzle.state.push(vec![0; 3]);
-        assert_eq!(puzzle.check_state(), false);
+        assert!(!puzzle.check_state());
         puzzle.state.pop();
         // Case where a value is greater than the size
         puzzle.state[0][0] = 9;
-        assert_eq!(puzzle.check_state(), false);
+        assert!(!puzzle.check_state());
         puzzle.state[0][0] = 1;
         // Case where the blank position is not correct
         puzzle.blank_pos = Pos::new(0, 0);
-        assert_eq!(puzzle.check_state(), false);
+        assert!(!puzzle.check_state());
     }
 
     #[test]
     fn test_is_final_state() {
         let mut puzzle = Puzzle::new_answer(3);
-        assert_eq!(puzzle.is_final_state(), true);
+        assert!(puzzle.is_final_state());
         puzzle.state[0][0] = 0;
-        assert_eq!(puzzle.is_final_state(), false);
+        assert!(!puzzle.is_final_state());
     }
 
     #[test]
