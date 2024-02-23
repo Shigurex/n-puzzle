@@ -10,10 +10,7 @@ impl Pos {
     }
 
     pub fn as_tuple(&self) -> (usize, usize) {
-        let x: Vec<String> = ["x", "y"]
-            .iter()
-            .map(|s| s.to_string())
-            .collect();
+        let x: Vec<String> = ["x", "y"].iter().map(|s| s.to_string()).collect();
         println!("{}: {}", x[0], self.x);
 
         (self.x, self.y)

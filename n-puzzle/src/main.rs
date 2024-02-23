@@ -1,13 +1,13 @@
+mod algorithm;
 mod args;
 mod n_puzzle;
-mod algorithm;
 
-pub use n_puzzle::{PuzzleSettings, Puzzle, Move};
 pub use algorithm::{Algorithm, Heuristic};
+pub use n_puzzle::{Move, Puzzle, PuzzleSettings};
 
+use algorithm::Solver;
 use anyhow::Result;
 use args::{get_args, parse_args};
-use algorithm::Solver;
 
 fn run() -> Result<()> {
     // Parse arguments
@@ -15,7 +15,7 @@ fn run() -> Result<()> {
     let settings = match parse_args(args) {
         Ok(Some(settings)) => settings,
         Ok(_) => return Ok(()),
-        Err(e) => return Err(e)
+        Err(e) => return Err(e),
     };
     // Generate puzzle
     let puzzle = Puzzle::new(settings.puzzle_settings)?;

@@ -1,9 +1,9 @@
 mod astar;
-mod uniform_cost;
 mod greedy;
+mod uniform_cost;
 
+use super::{Move, Puzzle};
 use anyhow::Result;
-use super::{Puzzle, Move};
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum Heuristic {
@@ -21,7 +21,7 @@ pub enum Algorithm {
 impl Algorithm {
     pub fn is_heuristic(&self) -> bool {
         if let Algorithm::UniformCost = self {
-            return false
+            return false;
         }
         true
     }
@@ -121,21 +121,12 @@ mod tests {
 
     #[test]
     fn test_output_verbose() -> Result<()> {
-        let output = Output::new(
-            1,
-            1,
-            vec![Move::Right]
-        );
-        let puzzle = Puzzle::new_from_state(
-            vec![
-                vec![1, 2, 3],
-                vec![4, 5, 6],
-                vec![7, 0, 8],
-            ]
-        )?;
+        let output = Output::new(1, 1, vec![Move::Right]);
+        let puzzle = Puzzle::new_from_state(vec![vec![1, 2, 3], vec![4, 5, 6], vec![7, 0, 8]])?;
         let text = output.get_result_string(Some(puzzle))?;
-        assert_eq!(text,
-"Complexity in time: 1
+        assert_eq!(
+            text,
+            "Complexity in time: 1
 Complexity in size: 1
 Number of moves: 1
 1 2 3
@@ -145,24 +136,23 @@ Number of moves: 1
 1 2 3
 4 5 6
 7 8 0
-");
+"
+        );
         Ok(())
     }
 
     #[test]
     fn test_output_non_verbose() -> Result<()> {
-        let output = Output::new(
-            1,
-            1,
-            vec![Move::Up, Move::Left]
-        );
+        let output = Output::new(1, 1, vec![Move::Up, Move::Left]);
         let text = output.get_result_string(None)?;
-        assert_eq!(text,
-"Complexity in time: 1
+        assert_eq!(
+            text,
+            "Complexity in time: 1
 Complexity in size: 1
 Number of moves: 2
 Up Left 
-");
+"
+        );
         Ok(())
     }
 }

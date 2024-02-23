@@ -1,5 +1,5 @@
-use anyhow::{Result, anyhow};
 use crate::n_puzzle::Pos;
+use anyhow::{anyhow, Result};
 
 use super::Puzzle;
 use std::fs;
@@ -7,12 +7,14 @@ use std::fs;
 impl Puzzle {
     pub(super) fn parse_text(text_path: String) -> Result<Self> {
         let text = fs::read_to_string(text_path)?;
-        let text_without_comments: String = text.lines().map(|line| {
-            match line.find('#') {
+        let text_without_comments: String = text
+            .lines()
+            .map(|line| match line.find('#') {
                 Some(index) => &line[0..index],
-                _ => line
-            }
-        }).collect::<Vec<&str>>().join(" ");
+                _ => line,
+            })
+            .collect::<Vec<&str>>()
+            .join(" ");
         let mut elements: Vec<&str> = text_without_comments.split_whitespace().collect();
 
         let size: &str = match elements.first() {
@@ -25,7 +27,10 @@ impl Puzzle {
         let mut blank_pos = Pos::new(0, 0);
 
         if elements.len() != size * size {
-            return Err(anyhow!("Number of elements does not match puzzle size: {}.", size))
+            return Err(anyhow!(
+                "Number of elements does not match puzzle size: {}.",
+                size
+            ));
         }
         for (index, element) in elements.iter().enumerate() {
             let val = element.parse::<usize>()?;
@@ -37,9 +42,13 @@ impl Puzzle {
             }
         }
 
-        let puzzle = Self { size, state, blank_pos };
+        let puzzle = Self {
+            size,
+            state,
+            blank_pos,
+        };
         if !puzzle.check_state() {
-            return Err(anyhow!("Invalid puzzle format."))
+            return Err(anyhow!("Invalid puzzle format."));
         }
         Ok(puzzle)
     }

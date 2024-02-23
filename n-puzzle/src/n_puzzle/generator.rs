@@ -1,6 +1,6 @@
-use anyhow::{Result, anyhow};
+use super::{Pos, Puzzle};
+use anyhow::{anyhow, Result};
 use rand::seq::SliceRandom;
-use super::{Puzzle, Pos};
 
 impl Puzzle {
     pub(super) fn generate(size: usize) -> Result<Self> {
@@ -23,7 +23,11 @@ impl Puzzle {
                 }
             }
         }
-        Ok(Self { size, state, blank_pos })
+        Ok(Self {
+            size,
+            state,
+            blank_pos,
+        })
     }
 }
 

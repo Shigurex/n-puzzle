@@ -1,10 +1,10 @@
-mod pos;
-mod parser;
 mod generator;
+mod parser;
+mod pos;
 
 pub use pos::Pos;
 
-use anyhow::{Result, anyhow};
+use anyhow::{anyhow, Result};
 
 #[derive(Debug, PartialEq)]
 pub enum PuzzleSettings {
@@ -47,7 +47,11 @@ impl Puzzle {
                 }
             }
         }
-        let puzzle = Self { size, state, blank_pos };
+        let puzzle = Self {
+            size,
+            state,
+            blank_pos,
+        };
         if !puzzle.check_state() {
             return Err(anyhow!("Invalid state"));
         }
@@ -65,7 +69,11 @@ impl Puzzle {
             }
         }
         state[size - 1][size - 1] = 0;
-        Self { size, state, blank_pos: Pos::new(size - 1, size - 1) }
+        Self {
+            size,
+            state,
+            blank_pos: Pos::new(size - 1, size - 1),
+        }
     }
 
     /// Check puzzle state
@@ -76,7 +84,7 @@ impl Puzzle {
         }
         for row in &self.state {
             if row.len() != self.size {
-                return false
+                return false;
             }
             for val in row {
                 if *val >= self.size * self.size {
@@ -105,7 +113,7 @@ impl Puzzle {
         for i in 0..self.size {
             for j in 0..self.size {
                 if count == self.size * self.size {
-                    break
+                    break;
                 }
                 if self.state[i][j] != count {
                     return false;
@@ -159,8 +167,15 @@ impl Puzzle {
 
     /// Swap the values at the given positions
     pub fn swap(&mut self, pos1: Pos, pos2: Pos) -> Result<()> {
-        if pos1.x >= self.size || pos1.y >= self.size || pos2.x >= self.size || pos2.y >= self.size {
-            return Err(anyhow!("Index out of bounds: ({}, {}), ({}, {})", pos1.x, pos1.y, pos2.x, pos2.y));
+        if pos1.x >= self.size || pos1.y >= self.size || pos2.x >= self.size || pos2.y >= self.size
+        {
+            return Err(anyhow!(
+                "Index out of bounds: ({}, {}), ({}, {})",
+                pos1.x,
+                pos1.y,
+                pos2.x,
+                pos2.y
+            ));
         }
         let val1 = self.get(pos1)?;
         let val2 = self.get(pos2)?;
@@ -183,25 +198,25 @@ impl Puzzle {
                     return Err(anyhow!("Cannot move up"));
                 }
                 self.swap(pos, pos - Pos::new(0, 1))?;
-            },
+            }
             Move::Down => {
                 if pos.y == self.size - 1 {
                     return Err(anyhow!("Cannot move down"));
                 }
                 self.swap(pos, pos + Pos::new(0, 1))?;
-            },
+            }
             Move::Left => {
                 if pos.x == 0 {
                     return Err(anyhow!("Cannot move left"));
                 }
                 self.swap(pos, pos - Pos::new(1, 0))?;
-            },
+            }
             Move::Right => {
                 if pos.x == self.size - 1 {
                     return Err(anyhow!("Cannot move right"));
                 }
                 self.swap(pos, pos + Pos::new(1, 0))?;
-            },
+            }
         }
         Ok(())
     }
@@ -230,7 +245,10 @@ mod tests {
     fn test_new_answer() {
         let puzzle = Puzzle::new_answer(3);
         assert_eq!(puzzle.size, 3);
-        assert_eq!(puzzle.state, vec![vec![1, 2, 3], vec![4, 5, 6], vec![7, 8, 0]]);
+        assert_eq!(
+            puzzle.state,
+            vec![vec![1, 2, 3], vec![4, 5, 6], vec![7, 8, 0]]
+        );
     }
 
     #[test]
@@ -330,19 +348,37 @@ mod tests {
         assert!(puzzle.move_blank(Move::Down).is_err());
         assert!(puzzle.move_blank(Move::Right).is_err());
         puzzle.move_blank(Move::Up).unwrap();
-        assert_eq!(puzzle.state, vec![vec![1, 2, 3], vec![4, 5, 0], vec![7, 8, 6]]);
+        assert_eq!(
+            puzzle.state,
+            vec![vec![1, 2, 3], vec![4, 5, 0], vec![7, 8, 6]]
+        );
         puzzle.move_blank(Move::Up).unwrap();
-        assert_eq!(puzzle.state, vec![vec![1, 2, 0], vec![4, 5, 3], vec![7, 8, 6]]);
+        assert_eq!(
+            puzzle.state,
+            vec![vec![1, 2, 0], vec![4, 5, 3], vec![7, 8, 6]]
+        );
         assert!(puzzle.move_blank(Move::Up).is_err());
         puzzle.move_blank(Move::Left).unwrap();
-        assert_eq!(puzzle.state, vec![vec![1, 0, 2], vec![4, 5, 3], vec![7, 8, 6]]);
+        assert_eq!(
+            puzzle.state,
+            vec![vec![1, 0, 2], vec![4, 5, 3], vec![7, 8, 6]]
+        );
         puzzle.move_blank(Move::Left).unwrap();
-        assert_eq!(puzzle.state, vec![vec![0, 1, 2], vec![4, 5, 3], vec![7, 8, 6]]);
+        assert_eq!(
+            puzzle.state,
+            vec![vec![0, 1, 2], vec![4, 5, 3], vec![7, 8, 6]]
+        );
         assert!(puzzle.move_blank(Move::Left).is_err());
         puzzle.move_blank(Move::Down).unwrap();
-        assert_eq!(puzzle.state, vec![vec![4, 1, 2], vec![0, 5, 3], vec![7, 8, 6]]);
+        assert_eq!(
+            puzzle.state,
+            vec![vec![4, 1, 2], vec![0, 5, 3], vec![7, 8, 6]]
+        );
         puzzle.move_blank(Move::Right).unwrap();
-        assert_eq!(puzzle.state, vec![vec![4, 1, 2], vec![5, 0, 3], vec![7, 8, 6]]);
+        assert_eq!(
+            puzzle.state,
+            vec![vec![4, 1, 2], vec![5, 0, 3], vec![7, 8, 6]]
+        );
     }
 
     #[test]
