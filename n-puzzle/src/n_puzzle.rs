@@ -1,6 +1,7 @@
 mod generator;
 mod parser;
 mod pos;
+mod solvable;
 
 pub use pos::Pos;
 
@@ -31,7 +32,7 @@ impl Puzzle {
     /// Generate a new puzzle with PuzzleSettings
     pub fn new(settings: PuzzleSettings) -> Result<Self> {
         match settings {
-            PuzzleSettings::Size(size) => Self::generate(size),
+            PuzzleSettings::Size(size) => Self::generate_solvable(size),
             PuzzleSettings::TextPath(text_path) => Self::parse_text(text_path),
         }
     }
