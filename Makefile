@@ -32,4 +32,4 @@ fclean: clean
 
 re: fclean all
 
-.PHONY: all clean fclean re release debug test
+.PHONY: all clean fclean re release debug test lint fmt-check fmt
