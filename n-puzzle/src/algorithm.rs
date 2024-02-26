@@ -53,7 +53,9 @@ impl Output {
         Ok(text)
     }
 
-    fn non_verbose_output(&self, mut text: String) -> String {
+    fn non_verbose_output(&self, mut text: String, puzzle: Puzzle) -> String {
+        text += format!("{}", puzzle).as_str();
+        text += "Moves: ";
         for m in &self.path {
             text += format!("{:?} ", m).as_str();
         }
@@ -61,21 +63,21 @@ impl Output {
         text
     }
 
-    pub fn get_result_string(&self, puzzle: Option<Puzzle>) -> Result<String> {
+    pub fn get_result_string(&self, puzzle: Puzzle, verbose: bool) -> Result<String> {
         let mut text = String::new();
         text += format!("Complexity in time: {}\n", self.complexity_in_time).as_str();
         text += format!("Complexity in size: {}\n", self.complexity_in_size).as_str();
         text += format!("Number of moves: {}\n", self.path.len()).as_str();
-        let text = if let Some(puzzle) = puzzle {
+        let text = if verbose {
             self.verbose_output(text, puzzle)?
         } else {
-            self.non_verbose_output(text)
+            self.non_verbose_output(text, puzzle)
         };
         Ok(text)
     }
 
-    pub fn put_result(&self, puzzle: Option<Puzzle>) -> Result<()> {
-        let text = self.get_result_string(puzzle)?;
+    pub fn put_result(&self, puzzle: Puzzle, verbose: bool) -> Result<()> {
+        let text = self.get_result_string(puzzle, verbose)?;
         print!("{}", text);
         Ok(())
     }
@@ -107,11 +109,7 @@ impl Solver {
     }
 
     fn put_result(&self, output: Output, verbose: bool) -> Result<()> {
-        if verbose {
-            output.put_result(Some(self.start_state.clone()))
-        } else {
-            output.put_result(None)
-        }
+        output.put_result(self.start_state.clone(), verbose)
     }
 }
 
@@ -123,7 +121,7 @@ mod tests {
     fn test_output_verbose() -> Result<()> {
         let output = Output::new(1, 1, vec![Move::Right]);
         let puzzle = Puzzle::new_from_state(vec![vec![1, 2, 3], vec![4, 5, 6], vec![7, 0, 8]])?;
-        let text = output.get_result_string(Some(puzzle))?;
+        let text = output.get_result_string(puzzle, true)?;
         assert_eq!(
             text,
             "Complexity in time: 1
@@ -144,13 +142,17 @@ Number of moves: 1
     #[test]
     fn test_output_non_verbose() -> Result<()> {
         let output = Output::new(1, 1, vec![Move::Up, Move::Left]);
-        let text = output.get_result_string(None)?;
+        let puzzle = Puzzle::new_from_state(vec![vec![1, 2, 3], vec![4, 0, 5], vec![7, 8, 6]])?;
+        let text = output.get_result_string(puzzle, false)?;
         assert_eq!(
             text,
             "Complexity in time: 1
 Complexity in size: 1
 Number of moves: 2
-Up Left 
+1 2 3
+4 0 5
+7 8 6
+Moves: Up Left 
 "
         );
         Ok(())

@@ -29,6 +29,14 @@ impl Puzzle {
             blank_pos,
         })
     }
+
+    pub(super) fn generate_solvable(size: usize) -> Result<Self> {
+        let mut puzzle = Self::generate(size)?;
+        while !puzzle.is_solvable()? {
+            puzzle = Self::generate(size)?;
+        }
+        Ok(puzzle)
+    }
 }
 
 #[cfg(test)]
@@ -52,5 +60,13 @@ mod tests {
     fn test_generate_invalid() {
         let puzzle = Puzzle::generate(1);
         assert!(puzzle.is_err());
+    }
+
+    #[test]
+    fn test_generate_solvable_normal() {
+        let puzzle = Puzzle::generate_solvable(5).unwrap();
+        let result = puzzle.check_state();
+        assert!(result);
+        assert!(puzzle.is_solvable().unwrap());
     }
 }
