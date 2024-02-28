@@ -30,7 +30,7 @@ impl Puzzle {
         })
     }
 
-    pub(super) fn generate_solvable(size: usize) -> Result<Self> {
+    pub fn generate_solvable(size: usize) -> Result<Self> {
         let mut puzzle = Self::generate(size)?;
         while !puzzle.is_solvable()? {
             puzzle = Self::generate(size)?;
