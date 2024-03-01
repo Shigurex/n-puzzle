@@ -3,20 +3,39 @@ use crate::{Move, Puzzle};
 use anyhow::Result;
 use std::collections::{BinaryHeap, HashSet};
 
-#[derive(Clone, Debug)]
-struct Node {
-    state: Puzzle,
-    cost: usize,
-    path: Vec<Move>,
+fn uniform_cost(_puzzle: &Puzzle) -> usize {
+    0
 }
 
-impl Node {
-    pub fn new(state: Puzzle, cost: usize, path: Vec<Move>) -> Self {
-        Self { state, cost, path }
+#[derive(Clone, Debug)]
+struct OpendSetNode {
+    state: Puzzle,
+    path: Vec<Move>,
+    cost: usize,
+    heuristics_cost: usize,
+}
+
+impl OpendSetNode {
+    pub fn new(state: Puzzle, path: Vec<Move>, cost: usize, heuristic: fn (&Puzzle) -> usize) -> Self {
+        let heuristics_cost = heuristic(&state);
+        Self {
+            state,
+            path,
+            cost,
+            heuristics_cost,
+        }
     }
 
     pub fn cost(&self) -> usize {
         self.cost
+    }
+
+    pub fn heuristics_cost(&self) -> usize {
+        self.heuristics_cost
+    }
+
+    pub fn total_cost(&self) -> usize {
+        self.cost + self.heuristics_cost
     }
 
     pub fn is_goal(&self) -> bool {
@@ -32,40 +51,29 @@ impl Node {
     }
 }
 
-#[derive(Clone, Debug)]
-struct UniformCostNode {
-    node: Node,
-}
-
-impl UniformCostNode {
-    pub fn new(node: Node) -> Self {
-        Self { node }
-    }
-}
-
-impl PartialEq for UniformCostNode {
+impl PartialEq for OpendSetNode {
     fn eq(&self, other: &Self) -> bool {
-        self.node.cost() == other.node.cost()
+        self.total_cost() == other.total_cost()
     }
 }
 
-impl Eq for UniformCostNode {}
+impl Eq for OpendSetNode {}
 
-impl PartialOrd for UniformCostNode {
+impl PartialOrd for OpendSetNode {
     fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
         Some(self.cmp(other))
     }
 }
 
-impl Ord for UniformCostNode {
+impl Ord for OpendSetNode {
     fn cmp(&self, other: &Self) -> std::cmp::Ordering {
-        other.node.cost().cmp(&self.node.cost())
+        (other.total_cost()).cmp(&self.total_cost())
     }
 }
 
 #[derive(Debug)]
 struct OpendSet {
-    set: BinaryHeap<UniformCostNode>,
+    set: BinaryHeap<OpendSetNode>,
     max_size: usize,
     count: usize,
 }
@@ -87,16 +95,16 @@ impl OpendSet {
         self.max_size
     }
 
-    pub fn insert(&mut self, node: Node) {
-        self.set.push(UniformCostNode::new(node));
+    pub fn insert(&mut self, node: OpendSetNode) {
+        self.set.push(node);
         self.count += 1;
         if self.set.len() > self.max_size {
             self.max_size = self.set.len();
         }
     }
 
-    pub fn pop(&mut self) -> Option<Node> {
-        if let Some(UniformCostNode { node }) = self.set.pop() {
+    pub fn pop(&mut self) -> Option<OpendSetNode> {
+        if let Some(node) = self.set.pop() {
             Some(node)
         } else {
             None
@@ -124,10 +132,10 @@ impl ClosedSet {
     }
 }
 
-fn uniform_cost(puzzle: Puzzle) -> Result<Output> {
+fn astar(puzzle: Puzzle, heuristic: fn (&Puzzle) -> usize) -> Result<Output> {
     let mut open_set = OpendSet::new();
     let mut closed_set = ClosedSet::new();
-    open_set.insert(Node::new(puzzle, 0, vec![]));
+    open_set.insert(OpendSetNode::new(puzzle, vec![], 0, heuristic));
     while let Some(node) = open_set.pop() {
         if node.is_goal() {
             return Ok(Output::new(
@@ -143,7 +151,12 @@ fn uniform_cost(puzzle: Puzzle) -> Result<Output> {
                 if !closed_set.contains(&new_state) {
                     let mut new_path = node.path().clone();
                     new_path.push(move_dir);
-                    open_set.insert(Node::new(new_state, node.cost() + 1, new_path));
+                    open_set.insert(OpendSetNode::new(
+                        new_state,
+                        new_path,
+                        node.cost() + 1,
+                        heuristic,
+                    ));
                 }
             }
         }
@@ -152,7 +165,7 @@ fn uniform_cost(puzzle: Puzzle) -> Result<Output> {
 }
 
 pub(super) fn solve(puzzle: &Puzzle) -> Result<Output> {
-    uniform_cost(puzzle.clone())
+    astar(puzzle.clone(), uniform_cost)
 }
 
 #[cfg(test)]
@@ -163,7 +176,7 @@ mod tests {
     fn test_uniform_cost() {
         let mut puzzle = Puzzle::generate_solvable(3).unwrap();
         println!("{:?}", puzzle);
-        let output = uniform_cost(puzzle.clone()).unwrap();
+        let output = astar(puzzle.clone(), uniform_cost).unwrap();
         for m in output.path {
             puzzle.move_blank(m).unwrap();
         }
