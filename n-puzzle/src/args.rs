@@ -57,6 +57,7 @@ impl Settings {
         }
         match heuristic {
             "manhattan" => self.heuristic = Heuristic::Manhattan,
+            "hamming" => self.heuristic = Heuristic::Hamming,
             _ => {
                 return Err(anyhow!(
                     "Not a valid heuristic: {}. Use manhattan",
@@ -155,7 +156,7 @@ pub fn parse_args(args: Vec<String>) -> Result<Option<Settings>> {
     while i < len_args {
         let arg = args[i].as_str();
         match arg {
-            "-a" => {
+            "-a" | "--algorithm" => {
                 i += 1;
                 if i == len_args {
                     return Err(anyhow!(
@@ -164,7 +165,7 @@ pub fn parse_args(args: Vec<String>) -> Result<Option<Settings>> {
                 }
                 settings.set_algorithm(args[i].as_str())?
             }
-            "-h" => {
+            "-h" | "--heuristic" => {
                 i += 1;
                 if i == len_args {
                     return Err(anyhow!("Need a heuristic: Use manhattan"));
