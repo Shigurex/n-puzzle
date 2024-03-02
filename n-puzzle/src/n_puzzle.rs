@@ -21,6 +21,12 @@ pub enum Move {
     Right,
 }
 
+impl Move {
+    pub fn list() -> Vec<Move> {
+        vec![Move::Up, Move::Down, Move::Left, Move::Right]
+    }
+}
+
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct Puzzle {
     size: usize,

@@ -21,7 +21,7 @@ fn run() -> Result<()> {
     let puzzle = Puzzle::new(settings.puzzle_settings)?;
     // Solve puzzle
     let solver = Solver::new(settings.algorithm.unwrap(), settings.heuristic, puzzle);
-    solver.solve(true)?;
+    solver.solve(settings.verbose)?;
     Ok(())
 }
 
