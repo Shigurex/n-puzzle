@@ -8,15 +8,20 @@ fn uniform_cost(_puzzle: &Puzzle) -> usize {
 }
 
 #[derive(Clone, Debug)]
-struct OpenedSetNode {
+struct OpenSetNode {
     state: Puzzle,
     path: Vec<Move>,
     moved_cost: usize,
     heuristics_cost: usize,
 }
 
-impl OpenedSetNode {
-    pub fn new(state: Puzzle, path: Vec<Move>, moved_cost: usize, heuristic: fn (&Puzzle) -> usize) -> Self {
+impl OpenSetNode {
+    pub fn new(
+        state: Puzzle,
+        path: Vec<Move>,
+        moved_cost: usize,
+        heuristic: fn(&Puzzle) -> usize,
+    ) -> Self {
         let heuristics_cost = heuristic(&state);
         Self {
             state,
@@ -51,34 +56,34 @@ impl OpenedSetNode {
     }
 }
 
-impl PartialEq for OpenedSetNode {
+impl PartialEq for OpenSetNode {
     fn eq(&self, other: &Self) -> bool {
         self.total_cost() == other.total_cost()
     }
 }
 
-impl Eq for OpenedSetNode {}
+impl Eq for OpenSetNode {}
 
-impl PartialOrd for OpenedSetNode {
+impl PartialOrd for OpenSetNode {
     fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
         Some(self.cmp(other))
     }
 }
 
-impl Ord for OpenedSetNode {
+impl Ord for OpenSetNode {
     fn cmp(&self, other: &Self) -> std::cmp::Ordering {
         (other.total_cost()).cmp(&self.total_cost())
     }
 }
 
 #[derive(Debug)]
-struct OpendSet {
-    set: BinaryHeap<OpenedSetNode>,
+struct OpenSet {
+    set: BinaryHeap<OpenSetNode>,
     max_size: usize,
     count: usize,
 }
 
-impl OpendSet {
+impl OpenSet {
     pub fn new() -> Self {
         Self {
             set: BinaryHeap::new(),
@@ -95,7 +100,7 @@ impl OpendSet {
         self.max_size
     }
 
-    pub fn insert(&mut self, node: OpenedSetNode) {
+    pub fn insert(&mut self, node: OpenSetNode) {
         self.set.push(node);
         self.count += 1;
         if self.set.len() > self.max_size {
@@ -103,7 +108,7 @@ impl OpendSet {
         }
     }
 
-    pub fn pop(&mut self) -> Option<OpenedSetNode> {
+    pub fn pop(&mut self) -> Option<OpenSetNode> {
         self.set.pop()
     }
 }
@@ -128,10 +133,10 @@ impl ClosedSet {
     }
 }
 
-fn astar(puzzle: Puzzle, heuristic: fn (&Puzzle) -> usize) -> Result<Output> {
-    let mut open_set = OpendSet::new();
+fn astar(puzzle: Puzzle, heuristic: fn(&Puzzle) -> usize) -> Result<Output> {
+    let mut open_set = OpenSet::new();
     let mut closed_set = ClosedSet::new();
-    open_set.insert(OpenedSetNode::new(puzzle, vec![], 0, heuristic));
+    open_set.insert(OpenSetNode::new(puzzle, vec![], 0, heuristic));
     while let Some(node) = open_set.pop() {
         if node.is_goal() {
             return Ok(Output::new(
@@ -147,7 +152,7 @@ fn astar(puzzle: Puzzle, heuristic: fn (&Puzzle) -> usize) -> Result<Output> {
                 if !closed_set.contains(&new_state) {
                     let mut new_path = node.path().clone();
                     new_path.push(move_dir);
-                    open_set.insert(OpenedSetNode::new(
+                    open_set.insert(OpenSetNode::new(
                         new_state,
                         new_path,
                         node.moved_cost() + 1,
