@@ -1,10 +1,53 @@
 use super::Output;
-use crate::{Move, Puzzle};
+use crate::{n_puzzle::Pos, Move, Puzzle};
 use anyhow::Result;
 use std::collections::{BinaryHeap, HashSet};
 
 fn uniform_cost(_puzzle: &Puzzle) -> usize {
     0
+}
+
+// calculate manhattan distance
+fn manhattan(puzzle: &Puzzle) -> usize {
+    let size = puzzle.get_size();
+    let mut distance = 0;
+
+    for i in 0..size * size {
+        let puzzle_pos = Pos::new(i % size, i / size);
+        if let Ok(puzzle_value) = puzzle.get(puzzle_pos) {
+            let answer_pos = Pos::new(
+                ((puzzle_value + size * size - 1) % (size * size)) % size,
+                ((puzzle_value + size * size - 1) % (size * size)) / size,
+            );
+            distance += puzzle_pos.x.abs_diff(answer_pos.x) + puzzle_pos.y.abs_diff(answer_pos.y);
+        }
+    }
+    distance
+}
+
+// calculate hamming distance
+fn hamming(puzzle: &Puzzle) -> usize {
+    let size = puzzle.get_size();
+    let mut distance = 0;
+
+    for i in 0..size * size {
+        let puzzle_pos = Pos::new(i % size, i / size);
+        if let Ok(puzzle_value) = puzzle.get(puzzle_pos) {
+            let answer_pos = Pos::new(
+                ((puzzle_value + size * size - 1) % (size * size)) % size,
+                ((puzzle_value + size * size - 1) % (size * size)) / size,
+            );
+            if puzzle_pos != answer_pos {
+                distance += 1;
+            }
+        }
+    }
+    distance
+}
+
+// https://medium.com/swlh/looking-into-k-puzzle-heuristics-6189318eaca2
+fn linear_conflict(puzzle: &Puzzle) -> usize {
+    
 }
 
 #[derive(Clone, Debug)]
@@ -166,7 +209,7 @@ fn astar(puzzle: Puzzle, heuristic: fn(&Puzzle) -> usize) -> Result<Output> {
 }
 
 pub(super) fn solve(puzzle: &Puzzle) -> Result<Output> {
-    astar(puzzle.clone(), uniform_cost)
+    astar(puzzle.clone(), hamming)
 }
 
 #[cfg(test)]
