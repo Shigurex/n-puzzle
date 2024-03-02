@@ -5,6 +5,7 @@ mod open_set;
 mod output;
 mod uniform_cost;
 
+use astar::astar;
 use closed_set::ClosedSet;
 use open_set::{OpenSet, OpenSetNode};
 use output::Output;
