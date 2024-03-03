@@ -169,7 +169,9 @@ pub fn parse_args(args: Vec<String>) -> Result<Option<Settings>> {
             "-h" | "--heuristic" => {
                 i += 1;
                 if i == len_args {
-                    return Err(anyhow!("Need a heuristic: Use manhattan"));
+                    return Err(anyhow!(
+                        "Need a heuristic: Use manhattan, hamming, or linearconflict"
+                    ));
                 }
                 settings.set_heuristic(args[i].as_str())?
             }
