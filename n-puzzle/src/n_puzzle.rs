@@ -131,6 +131,30 @@ impl Puzzle {
         true
     }
 
+    pub fn is_in_final_row(&self, pos: Pos) -> bool {
+        let base_value = match self.get(pos) {
+            Ok(value) => value,
+            _ => return false,
+        };
+        if base_value == 0 {
+            false
+        } else {
+            (base_value - 1) / self.size == pos.y
+        }
+    }
+
+    pub fn is_in_final_col(&self, pos: Pos) -> bool {
+        let base_value = match self.get(pos) {
+            Ok(value) => value,
+            _ => return false,
+        };
+        if base_value == 0 {
+            false
+        } else {
+            (base_value - 1) % self.size == pos.x
+        }
+    }
+
     /// Get the value at the given position
     pub fn get(&self, pos: Pos) -> Result<usize> {
         if pos.x >= self.size || pos.y >= self.size {

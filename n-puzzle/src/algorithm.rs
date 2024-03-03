@@ -17,6 +17,7 @@ use anyhow::Result;
 pub enum Heuristic {
     Manhattan,
     Hamming,
+    LinearConflict,
     None,
 }
 

@@ -58,9 +58,10 @@ impl Settings {
         match heuristic {
             "manhattan" => self.heuristic = Heuristic::Manhattan,
             "hamming" => self.heuristic = Heuristic::Hamming,
+            "linearconflict" => self.heuristic = Heuristic::LinearConflict,
             _ => {
                 return Err(anyhow!(
-                    "Not a valid heuristic: {}. Use manhattan",
+                    "Not a valid heuristic: {}. Use manhattan, hamming, or linearconflict",
                     heuristic
                 ))
             }
