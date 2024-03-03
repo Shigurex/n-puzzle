@@ -1,12 +1,24 @@
 use super::{ClosedSet, Heuristic, OpenSet, OpenSetNode, Output};
 use crate::{Move, Puzzle};
 use anyhow::Result;
+use std::time::{Duration, Instant};
 
-pub fn astar(puzzle: Puzzle, heuristic: fn(&Puzzle) -> usize) -> Result<Output> {
+pub fn astar(
+    puzzle: Puzzle,
+    heuristic: fn(&Puzzle) -> usize,
+    timeout: Option<u64>,
+) -> Result<Output> {
     let mut open_set = OpenSet::new();
     let mut closed_set = ClosedSet::new();
     open_set.insert(OpenSetNode::new(puzzle, vec![], 0, heuristic));
+
+    let start = Instant::now();
     while let Some(node) = open_set.pop() {
+        if let Some(time) = timeout {
+            if start.elapsed() > Duration::new(time, 0) {
+                return Err(anyhow::anyhow!("Timeout"));
+            }
+        }
         if node.is_goal() {
             return Ok(Output::new(
                 open_set.get_append_count(),
@@ -34,6 +46,10 @@ pub fn astar(puzzle: Puzzle, heuristic: fn(&Puzzle) -> usize) -> Result<Output> 
     Err(anyhow::anyhow!("No solution"))
 }
 
-pub(super) fn solve(_puzzle: &Puzzle, _heuristic: Heuristic) -> Result<Output> {
+pub(super) fn solve(
+    _puzzle: &Puzzle,
+    _heuristic: Heuristic,
+    _timeout: Option<u64>,
+) -> Result<Output> {
     Ok(Output::new(0, 0, vec![]))
 }

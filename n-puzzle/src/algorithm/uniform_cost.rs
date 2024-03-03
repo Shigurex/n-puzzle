@@ -6,8 +6,8 @@ fn uniform_cost(_puzzle: &Puzzle) -> usize {
     0
 }
 
-pub(super) fn solve(puzzle: &Puzzle) -> Result<Output> {
-    astar(puzzle.clone(), uniform_cost)
+pub(super) fn solve(puzzle: &Puzzle, timeout: Option<u64>) -> Result<Output> {
+    astar(puzzle.clone(), uniform_cost, timeout)
 }
 
 #[cfg(test)]
@@ -18,7 +18,7 @@ mod tests {
     fn test_uniform_cost() {
         let mut puzzle = Puzzle::generate_solvable(3).unwrap();
         println!("{:?}", puzzle);
-        let output = astar(puzzle.clone(), uniform_cost).unwrap();
+        let output = astar(puzzle.clone(), uniform_cost, None).unwrap();
         for m in output.path {
             puzzle.move_blank(m).unwrap();
         }

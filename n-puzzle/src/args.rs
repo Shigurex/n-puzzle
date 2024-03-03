@@ -9,6 +9,7 @@ pub struct Settings {
     pub puzzle_settings: PuzzleSettings,
     pub algorithm: Option<Algorithm>,
     pub heuristic: Heuristic,
+    pub timeout: Option<u64>,
     pub verbose: bool,
 }
 
@@ -17,18 +18,20 @@ impl Settings {
         puzzle_settings: PuzzleSettings,
         algorithm: Option<Algorithm>,
         heuristic: Heuristic,
+        timeout: Option<u64>,
         verbose: bool,
     ) -> Self {
         Self {
             puzzle_settings,
             algorithm,
             heuristic,
+            timeout,
             verbose,
         }
     }
 
     pub fn new_default() -> Self {
-        Self::new(PuzzleSettings::Size(0), None, Heuristic::None, false)
+        Self::new(PuzzleSettings::Size(0), None, Heuristic::None, None, false)
     }
 
     pub fn set_algorithm(&mut self, algorithm: &str) -> Result<()> {
@@ -64,6 +67,30 @@ impl Settings {
                 ))
             }
         }
+        Ok(())
+    }
+
+    pub fn set_timeout(&mut self, timeout: &str) -> Result<()> {
+        match self.timeout {
+            None => {}
+            Some(_) => return Err(anyhow!("Duplicate time defined.")),
+        }
+        let timeout: u64 = match timeout.trim().parse() {
+            Ok(num) if num > 0 => num,
+            Ok(_) => {
+                return Err(anyhow!(
+                    "Not a valid time: {}. Time must be more than 0",
+                    timeout
+                ))
+            }
+            Err(_) => {
+                return Err(anyhow!(
+                    "Not a valid number: {}. Use numerical numbers",
+                    timeout
+                ))
+            }
+        };
+        self.timeout = Some(timeout);
         Ok(())
     }
 
@@ -171,6 +198,13 @@ pub fn parse_args(args: Vec<String>) -> Result<Option<Settings>> {
                 }
                 settings.set_heuristic(args[i].as_str())?
             }
+            "-t" | "--timeout" => {
+                i += 1;
+                if i == len_args {
+                    return Err(anyhow!("Need a time: Use numerical numbers"));
+                }
+                settings.set_timeout(args[i].as_str())?
+            }
             "--verbose" => settings.verbose = true,
             _ => match arg.trim().parse::<usize>() {
                 Ok(_) => settings.set_size(arg)?,
@@ -196,6 +230,7 @@ mod tests {
             PuzzleSettings::Size(2),
             Some(Algorithm::AStar),
             Heuristic::Manhattan,
+            None,
             false,
         );
         assert_eq!(settings, answer_settings);
@@ -224,6 +259,7 @@ mod tests {
             PuzzleSettings::TextPath("test.txt".into()),
             Some(Algorithm::AStar),
             Heuristic::Manhattan,
+            None,
             false,
         );
         assert_eq!(settings, answer_settings);
@@ -250,6 +286,7 @@ mod tests {
             PuzzleSettings::Size(3),
             Some(Algorithm::AStar),
             Heuristic::Manhattan,
+            None,
             false,
         );
         assert_eq!(settings, answer_settings);
@@ -269,6 +306,7 @@ mod tests {
             PuzzleSettings::Size(3),
             Some(Algorithm::UniformCost),
             Heuristic::None,
+            None,
             false,
         );
         assert_eq!(settings, answer_settings);
@@ -288,6 +326,7 @@ mod tests {
             PuzzleSettings::Size(3),
             Some(Algorithm::Greedy),
             Heuristic::Manhattan,
+            None,
             false,
         );
         assert_eq!(settings, answer_settings);
@@ -319,6 +358,7 @@ mod tests {
             PuzzleSettings::Size(3),
             Some(Algorithm::AStar),
             Heuristic::Manhattan,
+            None,
             false,
         );
         assert_eq!(settings, answer_settings);
@@ -352,6 +392,7 @@ mod tests {
             PuzzleSettings::Size(3),
             Some(Algorithm::AStar),
             Heuristic::Manhattan,
+            None,
             false,
         );
         assert_eq!(settings, answer_settings);
@@ -373,6 +414,7 @@ mod tests {
             PuzzleSettings::Size(3),
             Some(Algorithm::Greedy),
             Heuristic::Manhattan,
+            None,
             false,
         );
         assert_eq!(settings, answer_settings);
@@ -408,6 +450,7 @@ mod tests {
             PuzzleSettings::TextPath("test.txt".into()),
             Some(Algorithm::AStar),
             Heuristic::Manhattan,
+            None,
             false,
         );
         assert_eq!(settings, answer_settings);
@@ -429,6 +472,7 @@ mod tests {
             PuzzleSettings::TextPath("test.txt".into()),
             Some(Algorithm::AStar),
             Heuristic::Manhattan,
+            None,
             false,
         );
         assert_eq!(settings, answer_settings);
@@ -464,6 +508,7 @@ mod tests {
             PuzzleSettings::TextPath("test.txt".into()),
             Some(Algorithm::AStar),
             Heuristic::Manhattan,
+            None,
             true,
         );
         assert_eq!(settings, answer_settings);
