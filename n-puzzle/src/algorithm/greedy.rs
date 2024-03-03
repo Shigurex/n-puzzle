@@ -1,7 +1,21 @@
-use super::Output;
+use super::{Output, astar, Heuristic};
 use crate::Puzzle;
 use anyhow::Result;
 
-pub(super) fn solve(_puzzle: &Puzzle) -> Result<Output> {
-    Ok(Output::new(0, 0, vec![]))
+pub(super) fn solve(puzzle: &Puzzle, _heuristic: Heuristic) -> Result<Output> {
+    astar(puzzle.clone(), |_| 0, true)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    // #[test]
+    // fn test_greedy_trivial() -> Result<()> {
+    //     let puzzle = Puzzle::new_from_state(vec![vec![1, 2, 3], vec![4, 5, 6], vec![7, 0, 8]])?;
+    //     let output = astar(puzzle.clone(), |_| 0, true)?;
+    //     assert!(output.path.len() == 1);
+    //     assert!(output.path[0] == crate::Move::Right);
+    //     Ok(())
+    // }
 }

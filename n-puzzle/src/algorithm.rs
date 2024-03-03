@@ -54,7 +54,7 @@ impl Solver {
         let output = match self.algorithm {
             Algorithm::AStar => astar::solve(&self.start_state, self.heuristic)?,
             Algorithm::UniformCost => uniform_cost::solve(&self.start_state)?,
-            Algorithm::Greedy => greedy::solve(&self.start_state)?,
+            Algorithm::Greedy => greedy::solve(&self.start_state, self.heuristic)?,
         };
         self.put_result(output, verbose)?;
         Ok(())
