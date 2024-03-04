@@ -1,12 +1,26 @@
+use std::time::{Duration, Instant};
+
 use super::{ClosedSet, Heuristic, OpenSet, OpenSetNode, Output};
 use crate::{n_puzzle::Pos, Move, Puzzle};
 use anyhow::{anyhow, Result};
 
-pub fn astar(puzzle: Puzzle, heuristic: fn(&Puzzle) -> usize) -> Result<Output> {
+pub fn astar(
+    puzzle: Puzzle,
+    heuristic: fn(&Puzzle) -> usize,
+    timeout: Option<u64>,
+) -> Result<Output> {
     let mut open_set = OpenSet::new();
     let mut closed_set = ClosedSet::new();
     open_set.insert(OpenSetNode::new(puzzle, vec![], 0, heuristic));
+
+    let start = Instant::now();
+    let timeout = timeout.map(|t| Duration::new(t, 0));
     while let Some(node) = open_set.pop() {
+        if let Some(duration) = timeout {
+            if start.elapsed() > duration {
+                return Err(anyhow::anyhow!("Timeout"));
+            }
+        }
         if node.is_goal() {
             return Ok(Output::new(
                 open_set.get_append_count(),
@@ -134,11 +148,11 @@ fn count_col_conflicts(puzzle: &Puzzle, col: usize) -> usize {
     conflicts
 }
 
-pub(super) fn solve(puzzle: &Puzzle, heuristic: Heuristic) -> Result<Output> {
+pub(super) fn solve(puzzle: &Puzzle, heuristic: Heuristic, timeout: Option<u64>) -> Result<Output> {
     match heuristic {
-        Heuristic::Manhattan => astar(puzzle.clone(), manhattan),
-        Heuristic::Hamming => astar(puzzle.clone(), hamming),
-        Heuristic::LinearConflict => astar(puzzle.clone(), linear_conflict),
+        Heuristic::Manhattan => astar(puzzle.clone(), manhattan, timeout),
+        Heuristic::Hamming => astar(puzzle.clone(), hamming, timeout),
+        Heuristic::LinearConflict => astar(puzzle.clone(), linear_conflict, timeout),
         _ => Err(anyhow!("Heuristics not set for astar.")),
     }
 }
