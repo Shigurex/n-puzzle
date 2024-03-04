@@ -2,12 +2,13 @@ use super::{astar, Heuristic, Output};
 use crate::Puzzle;
 use anyhow::Result;
 
-pub(super) fn solve(
-    puzzle: &Puzzle,
-    _heuristic: Heuristic,
-    timeout: Option<u64>,
-) -> Result<Output> {
-    astar(puzzle.clone(), |_| 0, true, timeout)
+pub(super) fn solve(puzzle: &Puzzle, heuristic: Heuristic, timeout: Option<u64>) -> Result<Output> {
+    astar(
+        puzzle.clone(),
+        Heuristic::get_heuristic(&heuristic)?,
+        true,
+        timeout,
+    )
 }
 
 #[cfg(test)]

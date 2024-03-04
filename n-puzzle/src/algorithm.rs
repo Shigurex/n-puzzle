@@ -1,9 +1,12 @@
 mod astar;
 mod closed_set;
 mod greedy;
+mod heuristic;
 mod open_set;
 mod output;
 mod uniform_cost;
+
+pub use heuristic::Heuristic;
 
 use astar::astar;
 use closed_set::ClosedSet;
@@ -12,14 +15,6 @@ use output::Output;
 
 use super::Puzzle;
 use anyhow::Result;
-
-#[derive(Debug, Clone, Copy, PartialEq)]
-pub enum Heuristic {
-    Manhattan,
-    Hamming,
-    LinearConflict,
-    None,
-}
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum Algorithm {

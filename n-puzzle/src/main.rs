@@ -3,7 +3,7 @@ mod args;
 mod n_puzzle;
 
 pub use algorithm::{Algorithm, Heuristic};
-pub use n_puzzle::{Move, Puzzle, PuzzleSettings};
+pub use n_puzzle::{Move, Pos, Puzzle, PuzzleSettings};
 
 use algorithm::Solver;
 use anyhow::Result;
