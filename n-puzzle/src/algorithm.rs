@@ -16,6 +16,8 @@ use anyhow::Result;
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum Heuristic {
     Manhattan,
+    Hamming,
+    LinearConflict,
     None,
 }
 
