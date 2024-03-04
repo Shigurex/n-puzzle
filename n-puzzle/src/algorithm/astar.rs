@@ -14,9 +14,10 @@ pub fn astar(
     open_set.insert(OpenSetNode::new(puzzle, vec![], 0, heuristic));
 
     let start = Instant::now();
+    let timeout = timeout.map(|t| Duration::new(t, 0));
     while let Some(node) = open_set.pop() {
-        if let Some(time) = timeout {
-            if start.elapsed() > Duration::new(time, 0) {
+        if let Some(duration) = timeout {
+            if start.elapsed() > duration {
                 return Err(anyhow::anyhow!("Timeout"));
             }
         }
