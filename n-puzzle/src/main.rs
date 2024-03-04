@@ -20,7 +20,12 @@ fn run() -> Result<()> {
     // Generate puzzle
     let puzzle = Puzzle::new(settings.puzzle_settings)?;
     // Solve puzzle
-    let solver = Solver::new(settings.algorithm.unwrap(), settings.heuristic, puzzle);
+    let solver = Solver::new(
+        settings.algorithm.unwrap(),
+        settings.heuristic,
+        puzzle,
+        settings.timeout,
+    );
     solver.solve(settings.verbose)?;
     Ok(())
 }

@@ -1,14 +1,18 @@
-use super::{Output, astar, Heuristic};
+use super::{astar, Heuristic, Output};
 use crate::Puzzle;
 use anyhow::Result;
 
-pub(super) fn solve(puzzle: &Puzzle, _heuristic: Heuristic) -> Result<Output> {
-    astar(puzzle.clone(), |_| 0, true)
+pub(super) fn solve(
+    puzzle: &Puzzle,
+    _heuristic: Heuristic,
+    timeout: Option<u64>,
+) -> Result<Output> {
+    astar(puzzle.clone(), |_| 0, true, timeout)
 }
 
 #[cfg(test)]
 mod tests {
-    use super::*;
+    // use super::*;
 
     // #[test]
     // fn test_greedy_trivial() -> Result<()> {

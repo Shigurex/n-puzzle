@@ -16,6 +16,8 @@ use anyhow::Result;
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum Heuristic {
     Manhattan,
+    Hamming,
+    LinearConflict,
     None,
 }
 
@@ -39,22 +41,29 @@ pub struct Solver {
     algorithm: Algorithm,
     heuristic: Heuristic,
     start_state: Puzzle,
+    timeout: Option<u64>,
 }
 
 impl Solver {
-    pub fn new(algorithm: Algorithm, heuristic: Heuristic, start_state: Puzzle) -> Self {
+    pub fn new(
+        algorithm: Algorithm,
+        heuristic: Heuristic,
+        start_state: Puzzle,
+        timeout: Option<u64>,
+    ) -> Self {
         Self {
             algorithm,
             heuristic,
             start_state,
+            timeout,
         }
     }
 
     pub fn solve(&self, verbose: bool) -> Result<()> {
         let output = match self.algorithm {
-            Algorithm::AStar => astar::solve(&self.start_state, self.heuristic)?,
-            Algorithm::UniformCost => uniform_cost::solve(&self.start_state)?,
-            Algorithm::Greedy => greedy::solve(&self.start_state, self.heuristic)?,
+            Algorithm::AStar => astar::solve(&self.start_state, self.heuristic, self.timeout)?,
+            Algorithm::UniformCost => uniform_cost::solve(&self.start_state, self.timeout)?,
+            Algorithm::Greedy => greedy::solve(&self.start_state, self.heuristic, self.timeout)?,
         };
         self.put_result(output, verbose)?;
         Ok(())
