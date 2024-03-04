@@ -1,33 +1,38 @@
-CXX = c++
-CXXFLAGS = -Wall -Wextra -Werror -std=c++20 -MMD -MP -pedantic -fsanitize=address
+NAME := n_puzzle
 
-INCLUDES = -I ./includes
+release:
+	@cd n-puzzle && cargo build --release
+	@cp n-puzzle/target/release/n-puzzle ./$(NAME)
 
-SRCDIR = srcs
-OBJDIR = objs
+debug:
+	@cd n-puzzle && cargo build
+	@cp n-puzzle/target/debug/n-puzzle ./$(NAME)
 
-SRCS = $(shell find $(SRCDIR) -type f -name "*.cpp")
-OBJS = $(SRCS:$(SRCDIR)/%.cpp=$(OBJDIR)/%.o)
+test:
+	@cd n-puzzle && cargo test
 
-NAME = n-puzzle
+web:
+	@cd n-puzzle && trunk serve --open
 
-$(NAME): $(OBJDIR) $(OBJS)
-	$(CXX) $(CXXFLAGS) $(INCLUDES) $(OBJS) -o $(NAME)
+lint:
+	@cd n-puzzle && cargo clippy --all-targets --all-features
 
-$(OBJDIR):
-	mkdir $(shell find $(SRCDIR) -type d | sed 's/^$(SRCDIR)/$(OBJDIR)/g')
+fmt-check:
+	@cd n-puzzle && cargo fmt --all --check
 
-all: $(NAME)
+fmt:
+	@cd n-puzzle && cargo fmt --all
+
+$(NAME): release
+
+all: release
 
 clean:
-	rm -rf $(OBJDIR)
+	@cd n-puzzle && cargo clean
 
 fclean: clean
-	$(RM) $(NAME)
+	@rm -f ./$(NAME)
 
 re: fclean all
 
-$(OBJDIR)/%.o: $(SRCDIR)/%.cpp
-	$(CXX) $(CXXFLAGS) $(INCLUDES) -o $@ -c $<
-
-.PHONY: all clean fclean re
+.PHONY: all clean fclean re release debug test lint fmt-check fmt web
