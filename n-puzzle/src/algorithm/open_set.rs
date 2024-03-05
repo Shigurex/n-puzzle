@@ -45,7 +45,7 @@ impl OpenSetNode {
         &self.state
     }
 
-    pub fn convert_state(self) -> Puzzle {
+    pub fn convert_to_state(self) -> Puzzle {
         self.state
     }
 

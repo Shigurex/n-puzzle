@@ -89,7 +89,7 @@ pub fn astar(
             append_optimal_state(&mut open_set, &node, heuristic)?;
         } else {
             append_all_movable_states(&mut open_set, &closed_set, &node, heuristic);
-            closed_set.insert(node.convert_state());
+            closed_set.insert(node.convert_to_state());
         }
     }
     Err(anyhow::anyhow!("No solution"))
