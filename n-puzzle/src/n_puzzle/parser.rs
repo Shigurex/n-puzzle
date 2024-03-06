@@ -1,4 +1,5 @@
 use crate::n_puzzle::Pos;
+use crate::MAX_PUZZLE_SIZE;
 use anyhow::{anyhow, Result};
 
 use super::Puzzle;
@@ -23,6 +24,14 @@ impl Puzzle {
         };
         elements.remove(0);
         let size: usize = size.parse()?;
+        if !(2..=MAX_PUZZLE_SIZE).contains(&size) {
+            return Err(anyhow!(
+                "Invalid puzzle size: {}. Must be between 2 and {}.",
+                size,
+                MAX_PUZZLE_SIZE
+            ));
+        }
+
         let mut state = vec![vec![0; size]; size];
         let mut blank_pos = Pos::new(0, 0);
 

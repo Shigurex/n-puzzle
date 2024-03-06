@@ -77,7 +77,6 @@ impl Ord for OpenSetNode {
 #[derive(Debug)]
 pub struct OpenSet {
     set: BinaryHeap<OpenSetNode>,
-    max_size: usize,
     count: usize,
 }
 
@@ -85,7 +84,6 @@ impl OpenSet {
     pub fn new() -> Self {
         Self {
             set: BinaryHeap::new(),
-            max_size: 0,
             count: 0,
         }
     }
@@ -94,19 +92,16 @@ impl OpenSet {
         self.count
     }
 
-    pub fn get_max_size(&self) -> usize {
-        self.max_size
-    }
-
     pub fn insert(&mut self, node: OpenSetNode) {
         self.set.push(node);
         self.count += 1;
-        if self.set.len() > self.max_size {
-            self.max_size = self.set.len();
-        }
     }
 
     pub fn pop(&mut self) -> Option<OpenSetNode> {
         self.set.pop()
+    }
+
+    pub fn len(&self) -> usize {
+        self.set.len()
     }
 }

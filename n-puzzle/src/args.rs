@@ -2,7 +2,7 @@ use anyhow::{anyhow, Result};
 
 use std::env;
 
-use super::{Algorithm, Heuristic, PuzzleSettings};
+use super::{Algorithm, Heuristic, PuzzleSettings, MAX_PUZZLE_SIZE};
 
 #[derive(Debug, PartialEq)]
 pub struct Settings {
@@ -117,11 +117,12 @@ impl Settings {
             _ => return Err(anyhow!("Duplicate size or text_path defined.")),
         }
         let size: usize = match size.trim().parse() {
-            Ok(num) if num > 1 => num,
+            Ok(num) if num > 1 && num < MAX_PUZZLE_SIZE => num,
             Ok(_) => {
                 return Err(anyhow!(
-                    "Not a valid size: {}. Size must be more than 1",
-                    size
+                    "Not a valid size: {}. Must be between 2 and {}.",
+                    size,
+                    MAX_PUZZLE_SIZE
                 ))
             }
             Err(_) => {

@@ -19,3 +19,21 @@ fn test_one_move() -> Result<()> {
     n_puzzle::run(args)?;
     Ok(())
 }
+
+#[test]
+fn test_error_size_puzzle() -> Result<()> {
+    let args: Vec<String> = [
+        "n-puzzle",
+        "-a",
+        "astar",
+        "-h",
+        "linearconflict",
+        "../puzzles/error_one_puzzle.txt",
+    ]
+    .iter()
+    .map(|s| s.to_string())
+    .collect();
+
+    assert!(n_puzzle::run(args).is_err());
+    Ok(())
+}
