@@ -29,9 +29,9 @@ impl OpenSetNode {
         self.moved_cost
     }
 
-    // pub fn heuristics_cost(&self) -> usize {
-    //     self.heuristics_cost
-    // }
+    pub fn heuristics_cost(&self) -> usize {
+        self.heuristics_cost
+    }
 
     pub fn total_cost(&self) -> usize {
         self.moved_cost + self.heuristics_cost
@@ -43,6 +43,10 @@ impl OpenSetNode {
 
     pub fn state(&self) -> &Puzzle {
         &self.state
+    }
+
+    pub fn convert_to_state(self) -> Puzzle {
+        self.state
     }
 
     pub fn path(&self) -> &Vec<Move> {

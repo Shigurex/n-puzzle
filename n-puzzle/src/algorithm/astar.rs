@@ -1,12 +1,69 @@
+use super::{ClosedSet, Heuristic, OpenSet, OpenSetNode, Output};
+use crate::{Move, Puzzle};
+use anyhow::Result;
 use std::time::{Duration, Instant};
 
-use super::{ClosedSet, Heuristic, OpenSet, OpenSetNode, Output};
-use crate::{n_puzzle::Pos, Move, Puzzle};
-use anyhow::{anyhow, Result};
+fn append_optimal_state(
+    open_set: &mut OpenSet,
+    node: &OpenSetNode,
+    heuristic: fn(&Puzzle) -> usize,
+) -> Result<()> {
+    let mut score = node.heuristics_cost();
+    let mut optimal_puzzle = None;
+    let mut optimal_direction = None;
+    for move_dir in Move::list() {
+        let mut new_state = node.state().clone();
+        if let Ok(()) = new_state.move_blank(move_dir) {
+            let new_score = heuristic(&new_state);
+            if new_score < score {
+                score = new_score;
+                optimal_puzzle = Some(new_state);
+                optimal_direction = Some(move_dir);
+            }
+        }
+    }
+    if let Some(puzzle) = optimal_puzzle {
+        let mut new_path = node.path().clone();
+        new_path.push(optimal_direction.unwrap());
+        open_set.insert(OpenSetNode::new(
+            puzzle,
+            new_path,
+            node.moved_cost() + 1,
+            heuristic,
+        ));
+        Ok(())
+    } else {
+        Err(anyhow::anyhow!("Optimal state not found"))
+    }
+}
+
+fn append_all_movable_states(
+    open_set: &mut OpenSet,
+    closed_set: &ClosedSet,
+    node: &OpenSetNode,
+    heuristic: fn(&Puzzle) -> usize,
+) {
+    for move_dir in Move::list() {
+        let mut new_state = node.state().clone();
+        if let Ok(()) = new_state.move_blank(move_dir) {
+            if !closed_set.contains(&new_state) {
+                let mut new_path = node.path().clone();
+                new_path.push(move_dir);
+                open_set.insert(OpenSetNode::new(
+                    new_state,
+                    new_path,
+                    node.moved_cost() + 1,
+                    heuristic,
+                ));
+            }
+        }
+    }
+}
 
 pub fn astar(
     puzzle: Puzzle,
     heuristic: fn(&Puzzle) -> usize,
+    is_greedy: bool,
     timeout: Option<u64>,
 ) -> Result<Output> {
     let mut open_set = OpenSet::new();
@@ -28,131 +85,16 @@ pub fn astar(
                 node.path().clone(),
             ));
         }
-        closed_set.insert(node.state().clone());
-        for move_dir in Move::list() {
-            let mut new_state = node.state().clone();
-            if let Ok(()) = new_state.move_blank(move_dir) {
-                if !closed_set.contains(&new_state) {
-                    let mut new_path = node.path().clone();
-                    new_path.push(move_dir);
-                    open_set.insert(OpenSetNode::new(
-                        new_state,
-                        new_path,
-                        node.moved_cost() + 1,
-                        heuristic,
-                    ));
-                }
-            }
+        if is_greedy {
+            append_optimal_state(&mut open_set, &node, heuristic)?;
+        } else {
+            append_all_movable_states(&mut open_set, &closed_set, &node, heuristic);
+            closed_set.insert(node.convert_to_state());
         }
     }
     Err(anyhow::anyhow!("No solution"))
 }
 
-// calculate manhattan distance
-pub fn manhattan(puzzle: &Puzzle) -> usize {
-    let size = puzzle.get_size();
-    let mut distance = 0;
-
-    for i in 0..size * size {
-        let puzzle_pos = Pos::new(i % size, i / size);
-        if let Ok(puzzle_value) = puzzle.get(puzzle_pos) {
-            let answer_pos = Pos::new(
-                ((puzzle_value + size * size - 1) % (size * size)) % size,
-                ((puzzle_value + size * size - 1) % (size * size)) / size,
-            );
-            distance += puzzle_pos.x.abs_diff(answer_pos.x) + puzzle_pos.y.abs_diff(answer_pos.y);
-        }
-    }
-    distance
-}
-
-// calculate hamming distance
-fn hamming(puzzle: &Puzzle) -> usize {
-    let size = puzzle.get_size();
-    let mut distance = 0;
-
-    for i in 0..size * size {
-        let puzzle_pos = Pos::new(i % size, i / size);
-        if let Ok(puzzle_value) = puzzle.get(puzzle_pos) {
-            let answer_pos = Pos::new(
-                ((puzzle_value + size * size - 1) % (size * size)) % size,
-                ((puzzle_value + size * size - 1) % (size * size)) / size,
-            );
-            if puzzle_pos != answer_pos {
-                distance += 1;
-            }
-        }
-    }
-    distance
-}
-
-// https://medium.com/swlh/looking-into-k-puzzle-heuristics-6189318eaca2
-// Two tiles t_j and t_k are in linear conflict if t_j and t_k are in the same line,
-// the goal position of t_j and t_k are both in that line, t_j is to the right of t_k,
-// and the goal position of t_j is to the left of the goal position of t_k.
-fn linear_conflict(puzzle: &Puzzle) -> usize {
-    let size = puzzle.get_size();
-    let mut distance = manhattan(puzzle);
-    let mut conflicts = 0;
-
-    for i in 0..size {
-        conflicts += count_row_conflicts(puzzle, i);
-        conflicts += count_col_conflicts(puzzle, i);
-    }
-    distance += conflicts * 2;
-
-    distance
-}
-
-fn count_row_conflicts(puzzle: &Puzzle, row: usize) -> usize {
-    let size = puzzle.get_size();
-    let mut conflicts = 0;
-
-    for i in 0..size {
-        let base_pos = Pos::new(i, row);
-        if !puzzle.is_in_final_row(base_pos) {
-            continue;
-        }
-        for j in i + 1..size {
-            let comparison_pos = Pos::new(j, row);
-            if !puzzle.is_in_final_row(comparison_pos) {
-                continue;
-            }
-            if puzzle.get(base_pos).unwrap() > puzzle.get(comparison_pos).unwrap() {
-                conflicts += 1;
-            }
-        }
-    }
-    conflicts
-}
-
-fn count_col_conflicts(puzzle: &Puzzle, col: usize) -> usize {
-    let size = puzzle.get_size();
-    let mut conflicts = 0;
-
-    for i in 0..size {
-        let base_pos = Pos::new(col, i);
-        if !puzzle.is_in_final_col(base_pos) {
-            continue;
-        }
-        for j in i + 1..size {
-            let comparison_pos = Pos::new(col, j);
-            if !puzzle.is_in_final_col(comparison_pos) {
-                continue;
-            }
-            if puzzle.get(base_pos).unwrap() > puzzle.get(comparison_pos).unwrap() {
-                conflicts += 1;
-            }
-        }
-    }
-    conflicts
-}
-
 pub(super) fn solve(puzzle: &Puzzle, heuristic: Heuristic, timeout: Option<u64>) -> Result<Output> {
-    match heuristic {
-        Heuristic::Manhattan => astar(puzzle.clone(), manhattan, timeout),
-        Heuristic::Hamming => astar(puzzle.clone(), hamming, timeout),
-        Heuristic::LinearConflict => astar(puzzle.clone(), linear_conflict, timeout),
-        _ => Err(anyhow!("Heuristics not set for astar.")),
-    }
+    astar(puzzle.clone(), heuristic.get_heuristic()?, false, timeout)
 }

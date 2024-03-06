@@ -76,7 +76,7 @@ https://n-puzzle.baletskyi.me/
     - https://ja.wikipedia.org/wiki/%E5%9D%87%E4%B8%80%E3%82%B3%E3%82%B9%E3%83%88%E6%8E%A2%E7%B4%A2
 - 貪欲法
     - https://ja.wikipedia.org/wiki/%E8%B2%AA%E6%AC%B2%E6%B3%95
-
+    - https://algodaily.com/lessons/getting-to-know-greedy-algorithms-through-examples
 
 ## n-puzzleの不可能な配置の証明
 
