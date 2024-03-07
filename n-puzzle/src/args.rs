@@ -61,10 +61,11 @@ impl Settings {
         match heuristic {
             "manhattan" => self.heuristic = Heuristic::Manhattan,
             "hamming" => self.heuristic = Heuristic::Hamming,
-            "linearconflict" => self.heuristic = Heuristic::LinearConflict,
+            "linear_conflict" => self.heuristic = Heuristic::LinearConflict,
+            "inversion_distance" => self.heuristic = Heuristic::InversionDistance,
             _ => {
                 return Err(anyhow!(
-                    "Not a valid heuristic: {}. Use manhattan, hamming, or linearconflict",
+                    "Not a valid heuristic: {}. Use manhattan, hamming, linear_conflict or inversion_distance",
                     heuristic
                 ))
             }
@@ -198,7 +199,7 @@ pub fn parse_args(args: Vec<String>) -> Result<Option<Settings>> {
                 i += 1;
                 if i == len_args {
                     return Err(anyhow!(
-                        "Need a heuristic: Use manhattan, hamming, or linearconflict"
+                        "Need a heuristic: Use manhattan, hamming, linear_conflict or inversion_distance"
                     ));
                 }
                 settings.set_heuristic(args[i].as_str())?

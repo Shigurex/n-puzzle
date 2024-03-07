@@ -7,7 +7,7 @@ fn test_one_move() -> Result<()> {
         "-a",
         "astar",
         "-h",
-        "linearconflict",
+        "linear_conflict",
         "-t",
         "10",
         "../puzzles/one_move_three.txt",
@@ -27,7 +27,7 @@ fn test_error_size_puzzle() -> Result<()> {
         "-a",
         "astar",
         "-h",
-        "linearconflict",
+        "linear_conflict",
         "../puzzles/error_one_puzzle.txt",
     ]
     .iter()
