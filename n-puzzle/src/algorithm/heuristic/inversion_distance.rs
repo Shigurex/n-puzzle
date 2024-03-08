@@ -1,4 +1,4 @@
-use crate::{Puzzle, Pos};
+use crate::{Pos, Puzzle};
 
 /// Inversion distance
 ///
@@ -94,11 +94,7 @@ mod tests {
 
     #[test]
     fn test_puzzle_to_vec_lr_tb_trivial() -> Result<()> {
-        let puzzle = Puzzle::new_from_state(vec![
-            vec![1, 2, 3],
-            vec![4, 5, 6],
-            vec![7, 8, 0],
-        ])?;
+        let puzzle = Puzzle::new_from_state(vec![vec![1, 2, 3], vec![4, 5, 6], vec![7, 8, 0]])?;
         let flat_state = puzzle_to_vec_lr_tb(&puzzle);
         assert_eq!(flat_state, vec![1, 2, 3, 4, 5, 6, 7, 8]);
         Ok(())
@@ -106,11 +102,7 @@ mod tests {
 
     #[test]
     fn test_puzzle_to_vec_lr_tb_normal() -> Result<()> {
-        let puzzle = Puzzle::new_from_state(vec![
-            vec![6, 5, 3],
-            vec![8, 2, 7],
-            vec![0, 1, 4],
-        ])?;
+        let puzzle = Puzzle::new_from_state(vec![vec![6, 5, 3], vec![8, 2, 7], vec![0, 1, 4]])?;
         let flat_state = puzzle_to_vec_lr_tb(&puzzle);
         assert_eq!(flat_state, vec![6, 5, 3, 8, 2, 7, 1, 4]);
         Ok(())
@@ -118,11 +110,7 @@ mod tests {
 
     #[test]
     fn test_puzzle_to_vec_tb_lr_trivial() -> Result<()> {
-        let puzzle = Puzzle::new_from_state(vec![
-            vec![1, 2, 3],
-            vec![4, 5, 6],
-            vec![7, 8, 0],
-        ])?;
+        let puzzle = Puzzle::new_from_state(vec![vec![1, 2, 3], vec![4, 5, 6], vec![7, 8, 0]])?;
         let flat_state = puzzle_to_vec_tb_lr(&puzzle);
         assert_eq!(flat_state, vec![1, 2, 3, 4, 5, 6, 7, 8]);
         Ok(())
@@ -130,11 +118,7 @@ mod tests {
 
     #[test]
     fn test_puzzle_to_vec_tb_lr_normal() -> Result<()> {
-        let puzzle = Puzzle::new_from_state(vec![
-            vec![6, 5, 3],
-            vec![8, 2, 7],
-            vec![0, 1, 4],
-        ])?;
+        let puzzle = Puzzle::new_from_state(vec![vec![6, 5, 3], vec![8, 2, 7], vec![0, 1, 4]])?;
         let flat_state = puzzle_to_vec_tb_lr(&puzzle);
         assert_eq!(flat_state, vec![8, 6, 5, 4, 1, 7, 3, 2]);
         Ok(())
@@ -188,24 +172,16 @@ mod tests {
 
     #[test]
     fn test_inversion_distance_trivial() {
-        let puzzle = Puzzle::new_from_state(vec![
-            vec![1, 2, 3],
-            vec![4, 5, 6],
-            vec![7, 8, 0],
-        ])
-        .unwrap();
+        let puzzle =
+            Puzzle::new_from_state(vec![vec![1, 2, 3], vec![4, 5, 6], vec![7, 8, 0]]).unwrap();
         let distance = inversion_distance(&puzzle);
         assert_eq!(distance, 0);
     }
 
     #[test]
     fn test_inversion_distance_normal() {
-        let puzzle = Puzzle::new_from_state(vec![
-            vec![6, 5, 3],
-            vec![8, 2, 7],
-            vec![0, 1, 4],
-        ])
-        .unwrap();
+        let puzzle =
+            Puzzle::new_from_state(vec![vec![6, 5, 3], vec![8, 2, 7], vec![0, 1, 4]]).unwrap();
         let distance = inversion_distance(&puzzle);
         assert_eq!(distance, 20);
     }

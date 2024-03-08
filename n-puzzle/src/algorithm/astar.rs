@@ -92,7 +92,8 @@ pub fn astar(
             append_all_movable_states(&mut open_set, &closed_set, &node, heuristic);
             closed_set.insert(node.convert_to_state());
         }
-        max_size = max_size.max(open_set.len() + closed_set.len());
+        // max_size <= open_set.len() + closed_set.len()
+        max_size = open_set.len() + closed_set.len();
     }
     Err(anyhow::anyhow!("No solution"))
 }
