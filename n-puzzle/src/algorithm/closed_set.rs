@@ -19,4 +19,8 @@ impl ClosedSet {
     pub fn contains(&self, state: &Puzzle) -> bool {
         self.set.contains(state)
     }
+
+    pub fn len(&self) -> usize {
+        self.set.len()
+    }
 }

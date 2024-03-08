@@ -9,6 +9,8 @@ use algorithm::Solver;
 use anyhow::Result;
 use args::{get_args, parse_args};
 
+const MAX_PUZZLE_SIZE: usize = 100;
+
 pub fn run(args: Vec<String>) -> Result<()> {
     // Parse arguments
     let settings = match parse_args(args) {

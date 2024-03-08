@@ -69,6 +69,7 @@ pub fn astar(
     let mut open_set = OpenSet::new();
     let mut closed_set = ClosedSet::new();
     open_set.insert(OpenSetNode::new(puzzle, vec![], 0, heuristic));
+    let mut max_size = 0;
 
     let start = Instant::now();
     let timeout = timeout.map(|t| Duration::new(t, 0));
@@ -81,7 +82,7 @@ pub fn astar(
         if node.is_goal() {
             return Ok(Output::new(
                 open_set.get_append_count(),
-                open_set.get_max_size(),
+                max_size,
                 node.path().clone(),
             ));
         }
@@ -91,6 +92,7 @@ pub fn astar(
             append_all_movable_states(&mut open_set, &closed_set, &node, heuristic);
             closed_set.insert(node.convert_to_state());
         }
+        max_size = max_size.max(open_set.len() + closed_set.len());
     }
     Err(anyhow::anyhow!("No solution"))
 }
