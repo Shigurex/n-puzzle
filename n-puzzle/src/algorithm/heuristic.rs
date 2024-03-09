@@ -1,3 +1,7 @@
+mod inversion_distance;
+
+pub use inversion_distance::inversion_distance;
+
 use crate::{Pos, Puzzle};
 use anyhow::{anyhow, Result};
 
@@ -6,6 +10,7 @@ pub enum Heuristic {
     Manhattan,
     Hamming,
     LinearConflict,
+    InversionDistance,
     None,
 }
 
@@ -15,6 +20,7 @@ impl Heuristic {
             Heuristic::Manhattan => manhattan,
             Heuristic::Hamming => hamming,
             Heuristic::LinearConflict => linear_conflict,
+            Heuristic::InversionDistance => inversion_distance,
             Heuristic::None => return Err(anyhow!("Heuristic not set")),
         };
         Ok(func)
