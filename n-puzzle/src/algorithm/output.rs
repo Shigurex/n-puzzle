@@ -5,14 +5,21 @@ use anyhow::Result;
 pub struct Output {
     pub complexity_in_time: usize,
     pub complexity_in_size: usize,
+    pub elapsed_time: f64,
     pub path: Vec<Move>,
 }
 
 impl Output {
-    pub fn new(complexity_in_time: usize, complexity_in_size: usize, path: Vec<Move>) -> Self {
+    pub fn new(
+        complexity_in_time: usize,
+        complexity_in_size: usize,
+        elapsed_time: f64,
+        path: Vec<Move>,
+    ) -> Self {
         Self {
             complexity_in_time,
             complexity_in_size,
+            elapsed_time,
             path,
         }
     }
@@ -41,6 +48,7 @@ impl Output {
         let mut text = String::new();
         text += format!("Complexity in time: {}\n", self.complexity_in_time).as_str();
         text += format!("Complexity in size: {}\n", self.complexity_in_size).as_str();
+        text += format!("Elapsed time: {:.6} seconds\n", self.elapsed_time).as_str();
         text += format!("Number of moves: {}\n", self.path.len()).as_str();
         let text = if verbose {
             self.verbose_output(text, puzzle)?
@@ -63,13 +71,14 @@ mod tests {
 
     #[test]
     fn test_output_verbose() -> Result<()> {
-        let output = Output::new(1, 1, vec![Move::Right]);
+        let output = Output::new(1, 1, 1.0, vec![Move::Right]);
         let puzzle = Puzzle::new_from_state(vec![vec![1, 2, 3], vec![4, 5, 6], vec![7, 0, 8]])?;
         let text = output.get_result_string(puzzle, true)?;
         assert_eq!(
             text,
             "Complexity in time: 1
 Complexity in size: 1
+Elapsed time: 1.000000 seconds
 Number of moves: 1
 1 2 3
 4 5 6
@@ -85,13 +94,14 @@ Number of moves: 1
 
     #[test]
     fn test_output_non_verbose() -> Result<()> {
-        let output = Output::new(1, 1, vec![Move::Up, Move::Left]);
+        let output = Output::new(1, 1, 2.0, vec![Move::Up, Move::Left]);
         let puzzle = Puzzle::new_from_state(vec![vec![1, 2, 3], vec![4, 0, 5], vec![7, 8, 6]])?;
         let text = output.get_result_string(puzzle, false)?;
         assert_eq!(
             text,
             "Complexity in time: 1
 Complexity in size: 1
+Elapsed time: 2.000000 seconds
 Number of moves: 2
 1 2 3
 4 0 5
