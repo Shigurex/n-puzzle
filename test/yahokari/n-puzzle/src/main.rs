@@ -21,44 +21,6 @@ fn App() -> Html {
     }
 }
 
-//#[function_component]
-//fn PuzzleComponent() -> Html {
-//    let state: UseStateHandle<Vec<Vec<usize>>> = use_state(|| vec![
-//            vec![1, 2, 3],
-//            vec![4, 5, 6],
-//            vec![7, 8, 0],
-//        ]
-//    );
-//    //let state: Vec<Vec<usize>> = vec![
-//    //    vec![1, 2, 3],
-//    //    vec![4, 5, 6],
-//    //    vec![7, 8, 0],
-//    //];
-//    let size = state.len();
-
-//    html! {
-//        <>
-//            <div class="matrix">
-//                { for (0..size).map(|col| html! {
-//                    <div class="column">
-//                        { for (0..size).map(|row| html! {
-//                            if state[col][row] == 0 {
-//                                <button class="cell empty">
-//                                    { state[col][row] }
-//                                </button>
-//                            } else {
-//                                <button class="cell">
-//                                    { state[col][row] }
-//                                </button>
-//                            }
-//                        })}
-//                    </div>
-//                })}
-//            </div>
-//        </>
-//    }
-//}
-
 #[function_component]
 fn PuzzleComponent() -> Html {
     let state: UseStateHandle<Vec<Vec<usize>>> = use_state(|| vec![
@@ -89,8 +51,6 @@ fn PuzzleComponent() -> Html {
                 let tmp = new_state[empty_row][empty_col];
                 new_state[empty_row][empty_col] = new_state[row][col];
                 new_state[row][col] = tmp;
-                //new_state.swap(empty_row, row);
-                //new_state[empty_row].swap(empty_col, col);
                 state.set(new_state);
             }
         })
@@ -105,9 +65,18 @@ fn PuzzleComponent() -> Html {
                             let cell_value = state[row][col];
                             let on_click = swap_empty.reform(move |_| (row, col));
                             html! {
-                                <button onclick={on_click} class={classes!("cell", if cell_value == 0 { "empty" } else { "" })}>
-                                    { cell_value }
-                                </button>
+                                //<button onclick={on_click} class={classes!("cell", if cell_value == 0 { "empty" } else { "" })}>
+                                //    { cell_value }
+                                //</button>
+                                if cell_value == 0 {
+                                    <button onclick={on_click} class={classes!("cell", "empty")}>
+                                        { "" }
+                                    </button>
+                                } else {
+                                    <button onclick={on_click} class={classes!("cell")}>
+                                        { cell_value }
+                                    </button>
+                                }
                             }
                         })}
                     </div>
