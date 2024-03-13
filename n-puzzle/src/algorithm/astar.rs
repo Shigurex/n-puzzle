@@ -83,6 +83,7 @@ pub fn astar(
             return Ok(Output::new(
                 open_set.get_append_count(),
                 max_size,
+                start.elapsed().as_secs_f64(),
                 node.path().clone(),
             ));
         }
