@@ -165,10 +165,11 @@ impl Puzzle {
             _ => return false,
         };
         if base_value == 0 {
-            false
-        } else {
-            (base_value - 1) / self.size == pos.y
+            return false;
         }
+        let answer_map = Self::generate_answer_pos_map(self.size);
+        let zero_pos = answer_map.get(&0).unwrap();
+        zero_pos.y == pos.y
     }
 
     pub fn is_in_final_col(&self, pos: Pos) -> bool {
@@ -177,10 +178,11 @@ impl Puzzle {
             _ => return false,
         };
         if base_value == 0 {
-            false
-        } else {
-            (base_value - 1) % self.size == pos.x
+            return false;
         }
+        let answer_map = Self::generate_answer_pos_map(self.size);
+        let zero_pos = answer_map.get(&0).unwrap();
+        zero_pos.x == pos.x
     }
 
     /// Get the value at the given position
