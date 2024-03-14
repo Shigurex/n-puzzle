@@ -6,6 +6,7 @@ mod solvable;
 pub use pos::Pos;
 
 use anyhow::{anyhow, Result};
+use std::collections::HashMap;
 
 #[derive(Debug, PartialEq)]
 pub enum PuzzleSettings {
@@ -68,19 +69,57 @@ impl Puzzle {
     /// Generate a answer puzzle with the given size
     pub fn new_answer(size: usize) -> Self {
         let mut state = vec![vec![0; size]; size];
-        let mut count = 1;
-        for row in &mut state {
-            for val in row {
-                *val = count;
-                count += 1;
+        let mut pos = Pos::new(0, 0);
+        let mut move_dir = Move::Right;
+        for i in 1..size * size {
+            state[pos.y][pos.x] = i;
+            match move_dir {
+                Move::Up => {
+                    if pos.y == 0 || state[pos.y - 1][pos.x] != 0 {
+                        move_dir = Move::Right;
+                    }
+                }
+                Move::Down => {
+                    if pos.y == size - 1 || state[pos.y + 1][pos.x] != 0 {
+                        move_dir = Move::Left;
+                    }
+                }
+                Move::Left => {
+                    if pos.x == 0 || state[pos.y][pos.x - 1] != 0 {
+                        move_dir = Move::Up;
+                    }
+                }
+                Move::Right => {
+                    if pos.x == size - 1 || state[pos.y][pos.x + 1] != 0 {
+                        move_dir = Move::Down;
+                    }
+                }
+            }
+            match move_dir {
+                Move::Up => pos.y -= 1,
+                Move::Down => pos.y += 1,
+                Move::Left => pos.x -= 1,
+                Move::Right => pos.x += 1,
             }
         }
-        state[size - 1][size - 1] = 0;
+        state[pos.y][pos.x] = 0;
         Self {
             size,
             state,
-            blank_pos: Pos::new(size - 1, size - 1),
+            blank_pos: pos,
         }
+    }
+
+    pub fn generate_answer_pos_map(size: usize) -> HashMap<usize, Pos> {
+        let mut map = HashMap::new();
+        let answer = Self::new_answer(size);
+        for y in 0..size {
+            for x in 0..size {
+                let val = answer.state[y][x];
+                map.insert(val, Pos::new(x, y));
+            }
+        }
+        map
     }
 
     /// Check puzzle state
@@ -116,19 +155,8 @@ impl Puzzle {
 
     /// Checl if the puzzle is in the final state
     pub fn is_final_state(&self) -> bool {
-        let mut count = 1;
-        for i in 0..self.size {
-            for j in 0..self.size {
-                if count == self.size * self.size {
-                    break;
-                }
-                if self.state[i][j] != count {
-                    return false;
-                }
-                count += 1;
-            }
-        }
-        true
+        let answer = Self::new_answer(self.size);
+        self.state == answer.state
     }
 
     pub fn is_in_final_row(&self, pos: Pos) -> bool {
@@ -251,6 +279,22 @@ impl Puzzle {
         }
         Ok(())
     }
+
+    pub fn generate_arrange_order_answer_map(size: usize, zero: bool) -> HashMap<usize, usize> {
+        let answer = Self::new_answer(size);
+        let mut map = HashMap::new();
+        for y in 0..size {
+            for x in 0..size {
+                let val = answer.state[y][x];
+                if zero && x == size - 1 && y == size - 1 {
+                    map.insert(val, 0);
+                } else {
+                    map.insert(val, y * size + x + 1);
+                }
+            }
+        }
+        map
+    }
 }
 
 impl std::fmt::Display for Puzzle {
@@ -278,7 +322,7 @@ mod tests {
         assert_eq!(puzzle.size, 3);
         assert_eq!(
             puzzle.state,
-            vec![vec![1, 2, 3], vec![4, 5, 6], vec![7, 8, 0]]
+            vec![vec![1, 2, 3], vec![8, 0, 4], vec![7, 6, 5]]
         );
     }
 
@@ -292,10 +336,10 @@ mod tests {
         puzzle.state[0][0] = 1;
         // Case where the line length is not equal to the size
         puzzle.state.pop();
-        puzzle.state.push(vec![8, 9]);
+        puzzle.state.push(vec![6, 5]);
         assert!(!puzzle.check_state());
         puzzle.state.pop();
-        puzzle.state.push(vec![8, 9, 0]);
+        puzzle.state.push(vec![7, 6, 5]);
         // Case where the column length is not equal to the size
         puzzle.state.push(vec![0; 3]);
         assert!(!puzzle.check_state());
@@ -321,8 +365,8 @@ mod tests {
     fn test_get() {
         let puzzle = Puzzle::new_answer(3);
         assert_eq!(puzzle.get(Pos::new(0, 0)).unwrap(), 1);
-        assert_eq!(puzzle.get(Pos::new(1, 2)).unwrap(), 8);
-        assert_eq!(puzzle.get(Pos::new(2, 2)).unwrap(), 0);
+        assert_eq!(puzzle.get(Pos::new(1, 2)).unwrap(), 6);
+        assert_eq!(puzzle.get(Pos::new(2, 2)).unwrap(), 5);
         assert!(puzzle.get(Pos::new(3, 0)).is_err());
         assert!(puzzle.get(Pos::new(0, 3)).is_err());
     }
@@ -361,12 +405,12 @@ mod tests {
     #[test]
     fn test_swap() {
         let mut puzzle = Puzzle::new_answer(3);
-        puzzle.swap(Pos::new(0, 0), Pos::new(2, 2)).unwrap();
+        puzzle.swap(Pos::new(0, 0), Pos::new(1, 1)).unwrap();
         assert_eq!(puzzle.state[0][0], 0);
-        assert_eq!(puzzle.state[2][2], 1);
+        assert_eq!(puzzle.state[1][1], 1);
         assert_eq!(puzzle.blank_pos, Pos::new(0, 0));
         puzzle.swap(Pos::new(0, 0), Pos::new(2, 2)).unwrap();
-        assert_eq!(puzzle.state[0][0], 1);
+        assert_eq!(puzzle.state[0][0], 5);
         assert_eq!(puzzle.state[2][2], 0);
         assert_eq!(puzzle.blank_pos, Pos::new(2, 2));
         assert!(puzzle.swap(Pos::new(0, 3), Pos::new(0, 0)).is_err());
@@ -376,45 +420,37 @@ mod tests {
     #[test]
     fn test_move_blank() {
         let mut puzzle = Puzzle::new_answer(3);
+        assert!(puzzle.move_blank(Move::Down).is_ok());
         assert!(puzzle.move_blank(Move::Down).is_err());
+        assert!(puzzle.move_blank(Move::Right).is_ok());
         assert!(puzzle.move_blank(Move::Right).is_err());
         puzzle.move_blank(Move::Up).unwrap();
         assert_eq!(
             puzzle.state,
-            vec![vec![1, 2, 3], vec![4, 5, 0], vec![7, 8, 6]]
+            vec![vec![1, 2, 3], vec![8, 6, 0], vec![7, 5, 4]]
         );
         puzzle.move_blank(Move::Up).unwrap();
         assert_eq!(
             puzzle.state,
-            vec![vec![1, 2, 0], vec![4, 5, 3], vec![7, 8, 6]]
+            vec![vec![1, 2, 0], vec![8, 6, 3], vec![7, 5, 4]]
         );
         assert!(puzzle.move_blank(Move::Up).is_err());
         puzzle.move_blank(Move::Left).unwrap();
         assert_eq!(
             puzzle.state,
-            vec![vec![1, 0, 2], vec![4, 5, 3], vec![7, 8, 6]]
+            vec![vec![1, 0, 2], vec![8, 6, 3], vec![7, 5, 4]]
         );
         puzzle.move_blank(Move::Left).unwrap();
         assert_eq!(
             puzzle.state,
-            vec![vec![0, 1, 2], vec![4, 5, 3], vec![7, 8, 6]]
+            vec![vec![0, 1, 2], vec![8, 6, 3], vec![7, 5, 4]]
         );
         assert!(puzzle.move_blank(Move::Left).is_err());
-        puzzle.move_blank(Move::Down).unwrap();
-        assert_eq!(
-            puzzle.state,
-            vec![vec![4, 1, 2], vec![0, 5, 3], vec![7, 8, 6]]
-        );
-        puzzle.move_blank(Move::Right).unwrap();
-        assert_eq!(
-            puzzle.state,
-            vec![vec![4, 1, 2], vec![5, 0, 3], vec![7, 8, 6]]
-        );
     }
 
     #[test]
     fn test_display() {
         let puzzle = Puzzle::new_answer(3);
-        assert_eq!(format!("{}", puzzle), "1 2 3\n4 5 6\n7 8 0\n");
+        assert_eq!(format!("{}", puzzle), "1 2 3\n8 0 4\n7 6 5\n");
     }
 }

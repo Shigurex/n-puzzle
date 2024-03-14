@@ -30,16 +30,14 @@ impl Heuristic {
 // calculate manhattan distance
 pub fn manhattan(puzzle: &Puzzle) -> usize {
     let size = puzzle.get_size();
+    let answer_map = Puzzle::generate_answer_pos_map(size);
     let mut distance = 0;
-
     for i in 0..size * size {
         let puzzle_pos = Pos::new(i % size, i / size);
         if let Ok(puzzle_value) = puzzle.get(puzzle_pos) {
-            let answer_pos = Pos::new(
-                ((puzzle_value + size * size - 1) % (size * size)) % size,
-                ((puzzle_value + size * size - 1) % (size * size)) / size,
-            );
-            distance += puzzle_pos.x.abs_diff(answer_pos.x) + puzzle_pos.y.abs_diff(answer_pos.y);
+            let answer_pos = answer_map.get(&puzzle_value).unwrap();
+            distance += (puzzle_pos.x as isize - answer_pos.x as isize).abs() as usize
+                + (puzzle_pos.y as isize - answer_pos.y as isize).abs() as usize;
         }
     }
     distance
@@ -48,16 +46,13 @@ pub fn manhattan(puzzle: &Puzzle) -> usize {
 // calculate hamming distance
 pub fn hamming(puzzle: &Puzzle) -> usize {
     let size = puzzle.get_size();
+    let answer = Puzzle::new_answer(size);
     let mut distance = 0;
-
     for i in 0..size * size {
         let puzzle_pos = Pos::new(i % size, i / size);
         if let Ok(puzzle_value) = puzzle.get(puzzle_pos) {
-            let answer_pos = Pos::new(
-                ((puzzle_value + size * size - 1) % (size * size)) % size,
-                ((puzzle_value + size * size - 1) % (size * size)) / size,
-            );
-            if puzzle_pos != answer_pos {
+            let answer_value = answer.get(puzzle_pos).unwrap();
+            if puzzle_value != answer_value {
                 distance += 1;
             }
         }
