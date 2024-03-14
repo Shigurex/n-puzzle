@@ -2,118 +2,170 @@ mod algorithm;
 mod args;
 mod n_puzzle;
 
+use anyhow::anyhow;
 use yew::prelude::*;
 use yew::{html, Html};
 
-pub use algorithm::{Algorithm, Heuristic};
+pub use algorithm::{Algorithm, Heuristic, Solver};
 pub use n_puzzle::{Move, Pos, Puzzle, PuzzleSettings};
 
 use yew::{function_component, Properties};
 
 #[function_component]
 fn App() -> Html {
+    let size = use_state(|| 3);
+    let puzzle = use_state(|| Puzzle::new(PuzzleSettings::Size(*size)).unwrap());
+
+    let move_blank = {
+        let puzzle = puzzle.clone();
+        Callback::from(move |clicked_pos: Pos| {
+            let blank_pos = puzzle.get_blank_pos();
+            let (dx, dy) = (
+                clicked_pos.x as isize - blank_pos.x as isize,
+                clicked_pos.y as isize - blank_pos.y as isize,
+            );
+
+            let mut new_puzzle = (*puzzle).clone();
+            let action = match (dx, dy) {
+                (1, 0) => new_puzzle.move_blank(Move::Right),
+                (-1, 0) => new_puzzle.move_blank(Move::Left),
+                (0, 1) => new_puzzle.move_blank(Move::Down),
+                (0, -1) => new_puzzle.move_blank(Move::Up),
+                _ => Err(anyhow!("Invalid move")),
+            };
+
+            if action.is_ok() {
+                puzzle.set(new_puzzle);
+            }
+        })
+    };
+
+    let solve_puzzle = {
+        let puzzle = puzzle.clone();
+        move |_| {
+            let new_puzzle = (*puzzle).clone();
+            let solver = Solver::new(Algorithm::AStar, Heuristic::Manhattan, new_puzzle, None);
+            let output = match solver.solve(true) {
+                Ok(output) => output,
+                Err(e) => {
+                    log::error!("Error solving puzzle: {:?}", e);
+                    return; // ここで早期リターン
+                }
+            };
+            let path = output.get_path();
+            log::info!("Path: {:?}", path);
+        }
+    };
+
     html! {
         <>
             <main>
-                <PuzzleComponent />
+                <div class="matrix">
+                    { for (0..(*puzzle).get_size()).map(|row| html! {
+                        <div class="row">
+                            { for (0..(*puzzle).get_size()).map(|col| {
+                                let cell_value = puzzle.get(Pos::new(col, row)).unwrap();
+                                let on_click = move_blank.reform(move |_| Pos::new(col, row));
+                                html! {
+                                    if cell_value == 0 {
+                                        <button onclick={on_click} class={classes!("cell", "empty")}>
+                                            { "" }
+                                        </button>
+                                    } else {
+                                        <button onclick={on_click} class={classes!("cell")}>
+                                            { cell_value }
+                                        </button>
+                                    }
+                                }
+                            })}
+                        </div>
+                    })}
+                </div>
+                if puzzle.is_final_state() {
+                    <div class="win">
+                        { "You win!" }
+                    </div>
+                }
+                <div>
+                    <button onclick={Callback::from(move |_| {
+                        let new_puzzle = Puzzle::new(PuzzleSettings::Size(*size)).unwrap();
+                        puzzle.set(new_puzzle);
+                    })}>
+                        { "Shuffle" }
+                    </button>
+                    <button onclick={solve_puzzle}>
+                        { "Solve" }
+                    </button>
+                </div>
             </main>
         </>
     }
 }
 
-#[function_component]
-fn PuzzleComponent() -> Html {
-    let state: UseStateHandle<Vec<Vec<usize>>> = use_state(|| vec![
-        vec![1, 2, 3],
-        vec![4, 5, 6],
-        vec![7, 8, 0],
-    ]);
-    //let state: UseStateHandle<Vec<Vec<usize>>> = use_state(|| Puzzle::new(PuzzleSettings::Size(3)).unwrap().get_state().clone());
-
-    let size = state.len();
-
-    let swap_empty = {
-        let state = state.clone();
-        Callback::from(move |(row, col): (usize, usize)| {
-            let mut new_state = (*state).clone();
-            // 空のマスの位置を見つける
-            let (empty_row, empty_col) = new_state.iter().enumerate().find_map(|(i, row)| {
-                row.iter().enumerate().find_map(|(j, &cell)| {
-                    if cell == 0 { Some((i, j)) } else { None }
-                })
-            }).unwrap();
-
-            // クリックされたマスが空のマスの隣接するマスかをチェック
-            let is_adjacent = (empty_row as i32 - row as i32).abs() + (empty_col as i32 - col as i32).abs() == 1;
-            
-            // 隣接していれば入れ替える
-            if is_adjacent {
-                let tmp = new_state[empty_row][empty_col];
-                new_state[empty_row][empty_col] = new_state[row][col];
-                new_state[row][col] = tmp;
-                state.set(new_state);
-            }
-        })
-    };
-
-    html! {
-        <>
-            <div class="matrix">
-                { for (0..size).map(|row| html! {
-                    <div class="row">
-                        { for (0..size).map(|col| {
-                            let cell_value = state[row][col];
-                            let on_click = swap_empty.reform(move |_| (row, col));
-                            html! {
-                                //<button onclick={on_click} class={classes!("cell", if cell_value == 0 { "empty" } else { "" })}>
-                                //    { cell_value }
-                                //</button>
-                                if cell_value == 0 {
-                                    <button onclick={on_click} class={classes!("cell", "empty")}>
-                                        { "" }
-                                    </button>
-                                } else {
-                                    <button onclick={on_click} class={classes!("cell")}>
-                                        { cell_value }
-                                    </button>
-                                }
-                            }
-                        })}
-                    </div>
-                })}
-            </div>
-        </>
-    }
-}
-
-#[derive(Properties, PartialEq)]
-pub struct Props {
-    pub children: Html
-}
-
-//#[function_component]
-//fn HelloWorld(props: &Props) -> Html {
-//    html! {
-//        <div class="very-stylized-container">
-//            { props.children.clone() } // you can forward children like this
-//        </div>
-//    }
+//#[derive(Properties, PartialEq)]
+//pub struct PuzzleProps {
+//    pub puzzle: Puzzle,
 //}
 
 //#[function_component]
-//fn SolvePuzzle(state: Vec<Vec<usize>>) -> Html {
-//    let a = 1;
+//fn PuzzleComponent(props: &PuzzleProps) -> Html {
+//    let puzzle = use_state(|| props.puzzle.clone());
+//    let size = props.puzzle.get_size();
+
+//    let move_blank = {
+//        let puzzle = puzzle.clone();
+//        Callback::from(move |clicked_pos: Pos| {
+//            let blank_pos = puzzle.get_blank_pos();
+//            let (dx, dy) = (clicked_pos.x as isize - blank_pos.x as isize, clicked_pos.y as isize - blank_pos.y as isize);
+
+//            let mut new_puzzle = (*puzzle).clone();
+//            let action = match (dx, dy) {
+//                (1, 0) => new_puzzle.move_blank(Move::Right),
+//                (-1, 0) => new_puzzle.move_blank(Move::Left),
+//                (0, 1) => new_puzzle.move_blank(Move::Down),
+//                (0, -1) => new_puzzle.move_blank(Move::Up),
+//                _ => Err(anyhow!("Invalid move")),
+//            };
+
+//            if action.is_ok() {
+//                puzzle.set(new_puzzle);
+//            }
+//        })
+//    };
+
 //    html! {
 //        <>
-//            <div>
-//                <button>{a}</button>
-//                <button>{2}</button>
-//                <button>{3}</button>
+//            <div class="matrix">
+//                { for (0..size).map(|row| html! {
+//                    <div class="row">
+//                        { for (0..size).map(|col| {
+//                            let cell_value = puzzle.get(Pos::new(col, row)).unwrap();
+//                            let on_click = move_blank.reform(move |_| Pos::new(col, row));
+//                            html! {
+//                                if cell_value == 0 {
+//                                    <button onclick={on_click} class={classes!("cell", "empty")}>
+//                                        { "" }
+//                                    </button>
+//                                } else {
+//                                    <button onclick={on_click} class={classes!("cell")}>
+//                                        { cell_value }
+//                                    </button>
+//                                }
+//                            }
+//                        })}
+//                    </div>
+//                })}
 //            </div>
+//            if puzzle.is_final_state() {
+//                <div class="win">
+//                    { "You win!" }
+//                </div>
+//            }
 //        </>
 //    }
 //}
 
 fn main() {
+    wasm_logger::init(wasm_logger::Config::default());
     yew::Renderer::<App>::new().render();
 }

@@ -54,17 +54,17 @@ impl Solver {
         }
     }
 
-    pub fn solve(&self, verbose: bool) -> Result<()> {
+    pub fn solve(&self, verbose: bool) -> Result<Output> {
         let output = match self.algorithm {
             Algorithm::AStar => astar::solve(&self.start_state, self.heuristic, self.timeout)?,
             Algorithm::UniformCost => uniform_cost::solve(&self.start_state, self.timeout)?,
             Algorithm::Greedy => greedy::solve(&self.start_state, self.heuristic, self.timeout)?,
         };
-        self.put_result(output, verbose)?;
-        Ok(())
+        self.put_result(&output, verbose)?;
+        Ok(output)
     }
 
-    fn put_result(&self, output: Output, verbose: bool) -> Result<()> {
+    fn put_result(&self, output: &Output, verbose: bool) -> Result<()> {
         output.put_result(self.start_state.clone(), verbose)
     }
 }

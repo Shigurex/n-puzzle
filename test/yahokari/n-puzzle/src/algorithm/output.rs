@@ -37,6 +37,18 @@ impl Output {
         text
     }
 
+    pub fn get_complexity_in_time(&self) -> usize {
+        self.complexity_in_time
+    }
+
+    pub fn get_complexity_in_size(&self) -> usize {
+        self.complexity_in_size
+    }
+
+    pub fn get_path(&self) -> &Vec<Move> {
+        &self.path
+    }
+
     pub fn get_result_string(&self, puzzle: Puzzle, verbose: bool) -> Result<String> {
         let mut text = String::new();
         text += format!("Complexity in time: {}\n", self.complexity_in_time).as_str();
