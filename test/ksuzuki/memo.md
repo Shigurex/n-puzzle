@@ -82,6 +82,8 @@ https://n-puzzle.baletskyi.me/
 - 貪欲法
     - https://ja.wikipedia.org/wiki/%E8%B2%AA%E6%AC%B2%E6%B3%95
     - https://algodaily.com/lessons/getting-to-know-greedy-algorithms-through-examples
+- もっとも難しい3パズル
+    - https://www.nct9.ne.jp/m_hiroi/linux/cpp32.html
 
 ## n-puzzleの不可能な配置の証明
 
