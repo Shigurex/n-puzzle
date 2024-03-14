@@ -153,7 +153,7 @@ impl Puzzle {
         true
     }
 
-    /// Checl if the puzzle is in the final state
+    /// Check if the puzzle is in the final state
     pub fn is_final_state(&self) -> bool {
         let answer = Self::new_answer(self.size);
         self.state == answer.state
@@ -161,28 +161,24 @@ impl Puzzle {
 
     pub fn is_in_final_row(&self, pos: Pos) -> bool {
         let base_value = match self.get(pos) {
+            Ok(0) => return false,
             Ok(value) => value,
             _ => return false,
         };
-        if base_value == 0 {
-            return false;
-        }
         let answer_map = Self::generate_answer_pos_map(self.size);
-        let zero_pos = answer_map.get(&0).unwrap();
-        zero_pos.y == pos.y
+        let answer_pos = answer_map.get(&base_value).unwrap();
+        answer_pos.y == pos.y
     }
 
     pub fn is_in_final_col(&self, pos: Pos) -> bool {
         let base_value = match self.get(pos) {
+            Ok(0) => return false,
             Ok(value) => value,
             _ => return false,
         };
-        if base_value == 0 {
-            return false;
-        }
         let answer_map = Self::generate_answer_pos_map(self.size);
-        let zero_pos = answer_map.get(&0).unwrap();
-        zero_pos.x == pos.x
+        let answer_pos = answer_map.get(&base_value).unwrap();
+        answer_pos.x == pos.x
     }
 
     /// Get the value at the given position
