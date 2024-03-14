@@ -81,18 +81,22 @@ pub fn linear_conflict(puzzle: &Puzzle) -> usize {
 fn count_row_conflicts(puzzle: &Puzzle, row: usize) -> usize {
     let size = puzzle.get_size();
     let mut conflicts = 0;
+    let answer_map = Puzzle::generate_answer_pos_map(size);
 
     for i in 0..size {
         let base_pos = Pos::new(i, row);
+        let base_value = puzzle.get(base_pos).unwrap();
         if !puzzle.is_in_final_row(base_pos) {
             continue;
         }
         for j in i + 1..size {
             let comparison_pos = Pos::new(j, row);
+            let comparison_value = puzzle.get(comparison_pos).unwrap();
             if !puzzle.is_in_final_row(comparison_pos) {
                 continue;
             }
-            if puzzle.get(base_pos).unwrap() > puzzle.get(comparison_pos).unwrap() {
+            if answer_map.get(&base_value).unwrap().x > answer_map.get(&comparison_value).unwrap().x
+            {
                 conflicts += 1;
             }
         }
@@ -103,18 +107,22 @@ fn count_row_conflicts(puzzle: &Puzzle, row: usize) -> usize {
 fn count_col_conflicts(puzzle: &Puzzle, col: usize) -> usize {
     let size = puzzle.get_size();
     let mut conflicts = 0;
+    let answer_map = Puzzle::generate_answer_pos_map(size);
 
     for i in 0..size {
         let base_pos = Pos::new(col, i);
+        let base_value = puzzle.get(base_pos).unwrap();
         if !puzzle.is_in_final_col(base_pos) {
             continue;
         }
         for j in i + 1..size {
             let comparison_pos = Pos::new(col, j);
+            let comparison_value = puzzle.get(comparison_pos).unwrap();
             if !puzzle.is_in_final_col(comparison_pos) {
                 continue;
             }
-            if puzzle.get(base_pos).unwrap() > puzzle.get(comparison_pos).unwrap() {
+            if answer_map.get(&base_value).unwrap().y > answer_map.get(&comparison_value).unwrap().y
+            {
                 conflicts += 1;
             }
         }
