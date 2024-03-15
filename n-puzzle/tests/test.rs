@@ -1,6 +1,15 @@
 use anyhow::Result;
 
 #[test]
+fn test_usage() -> Result<()> {
+    let args: Vec<String> = vec![String::from("n-puzzle")];
+    match n_puzzle::run(args).unwrap() {
+        Some(_) => panic!("Should return None"),
+        None => Ok(()),
+    }
+}
+
+#[test]
 fn test_one_move() -> Result<()> {
     let args: Vec<String> = [
         "n-puzzle",
@@ -16,7 +25,8 @@ fn test_one_move() -> Result<()> {
     .map(|s| s.to_string())
     .collect();
 
-    n_puzzle::run(args)?;
+    let (_, output) = n_puzzle::run(args)?.unwrap();
+    assert_eq!(output.path.len(), 1);
     Ok(())
 }
 
@@ -35,5 +45,30 @@ fn test_error_size_puzzle() -> Result<()> {
     .collect();
 
     assert!(n_puzzle::run(args).is_err());
+    Ok(())
+}
+
+#[test]
+fn test_unsolvable_puzzle() -> Result<()> {
+    let args: Vec<String> = ["n-puzzle", "../puzzles/unsolvable_puzzle.txt"]
+        .iter()
+        .map(|s| s.to_string())
+        .collect();
+
+    match n_puzzle::run(args) {
+        Ok(_) => panic!("Should return an error"),
+        Err(e) => assert!(e.to_string().contains("No solution")),
+    }
+    Ok(())
+}
+
+#[test]
+fn test_100_puzzle() -> Result<()> {
+    let args: Vec<String> = ["n-puzzle", "../puzzles/max_100_puzzle.txt"]
+        .iter()
+        .map(|s| s.to_string())
+        .collect();
+
+    n_puzzle::run(args)?;
     Ok(())
 }

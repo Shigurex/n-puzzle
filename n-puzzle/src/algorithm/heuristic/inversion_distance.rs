@@ -19,12 +19,14 @@ pub fn inversion_distance(puzzle: &Puzzle) -> usize {
 /// Convert puzzle to a vector from left to right and top to bottom
 fn puzzle_to_vec_lr_tb(puzzle: &Puzzle) -> Vec<usize> {
     let size = puzzle.get_size();
+    let answer_map = Puzzle::generate_arrange_order_answer_map(size, false);
     let mut flat_state = Vec::with_capacity(size * size - 1);
     for y in 0..size {
         for x in 0..size {
             if let Ok(value) = puzzle.get(Pos::new(x, y)) {
                 if value != 0 {
-                    flat_state.push(value);
+                    let answer_pos = answer_map.get(&value).unwrap();
+                    flat_state.push(*answer_pos);
                 }
             }
         }
@@ -35,14 +37,12 @@ fn puzzle_to_vec_lr_tb(puzzle: &Puzzle) -> Vec<usize> {
 /// Convert puzzle to a vector from top to bottom and left to right
 fn puzzle_to_vec_tb_lr(puzzle: &Puzzle) -> Vec<usize> {
     let size = puzzle.get_size();
-    let mut value_map = vec![0; size * size];
+    let answer_map = Puzzle::generate_arrange_order_answer_map(size, false);
+    let mut value_map = vec![0; size * size + 1];
     let mut count = 1;
     for x in 0..size {
         for y in 0..size {
             let index = y * size + x + 1;
-            if index == size * size {
-                continue;
-            }
             value_map[index] = count;
             count += 1;
         }
@@ -53,7 +53,8 @@ fn puzzle_to_vec_tb_lr(puzzle: &Puzzle) -> Vec<usize> {
         for y in 0..size {
             if let Ok(value) = puzzle.get(Pos::new(x, y)) {
                 if value != 0 {
-                    flat_state.push(value_map[value]);
+                    let answer_pos = answer_map.get(&value).unwrap();
+                    flat_state.push(value_map[*answer_pos]);
                 }
             }
         }
@@ -94,46 +95,46 @@ mod tests {
 
     #[test]
     fn test_puzzle_to_vec_lr_tb_trivial() -> Result<()> {
-        let puzzle = Puzzle::new_from_state(vec![vec![1, 2, 3], vec![4, 5, 6], vec![7, 8, 0]])?;
+        let puzzle = Puzzle::new_from_state(vec![vec![1, 2, 3], vec![8, 0, 4], vec![7, 6, 5]])?;
         let flat_state = puzzle_to_vec_lr_tb(&puzzle);
-        assert_eq!(flat_state, vec![1, 2, 3, 4, 5, 6, 7, 8]);
+        assert_eq!(flat_state, vec![1, 2, 3, 4, 6, 7, 8, 9]);
         Ok(())
     }
 
     #[test]
     fn test_puzzle_to_vec_lr_tb_normal() -> Result<()> {
-        let puzzle = Puzzle::new_from_state(vec![vec![6, 5, 3], vec![8, 2, 7], vec![0, 1, 4]])?;
+        let puzzle = Puzzle::new_from_state(vec![vec![1, 0, 3], vec![2, 8, 4], vec![7, 5, 6]])?;
         let flat_state = puzzle_to_vec_lr_tb(&puzzle);
-        assert_eq!(flat_state, vec![6, 5, 3, 8, 2, 7, 1, 4]);
+        assert_eq!(flat_state, vec![1, 3, 2, 4, 6, 7, 9, 8]);
         Ok(())
     }
 
     #[test]
     fn test_puzzle_to_vec_tb_lr_trivial() -> Result<()> {
-        let puzzle = Puzzle::new_from_state(vec![vec![1, 2, 3], vec![4, 5, 6], vec![7, 8, 0]])?;
+        let puzzle = Puzzle::new_from_state(vec![vec![1, 2, 3], vec![8, 0, 4], vec![7, 6, 5]])?;
         let flat_state = puzzle_to_vec_tb_lr(&puzzle);
-        assert_eq!(flat_state, vec![1, 2, 3, 4, 5, 6, 7, 8]);
+        assert_eq!(flat_state, vec![1, 2, 3, 4, 6, 7, 8, 9]);
         Ok(())
     }
 
     #[test]
     fn test_puzzle_to_vec_tb_lr_normal() -> Result<()> {
-        let puzzle = Puzzle::new_from_state(vec![vec![6, 5, 3], vec![8, 2, 7], vec![0, 1, 4]])?;
+        let puzzle = Puzzle::new_from_state(vec![vec![2, 1, 3], vec![8, 4, 0], vec![7, 5, 6]])?;
         let flat_state = puzzle_to_vec_tb_lr(&puzzle);
-        assert_eq!(flat_state, vec![8, 6, 5, 4, 1, 7, 3, 2]);
+        assert_eq!(flat_state, vec![4, 2, 3, 1, 8, 9, 7, 6]);
         Ok(())
     }
 
     #[test]
     fn test_count_inversions_trivial() {
-        let flat_state = vec![1, 2, 3, 4, 5, 6, 7, 8];
+        let flat_state = vec![1, 2, 3, 4, 6, 7, 8, 9];
         let count = count_inversions(&flat_state);
         assert_eq!(count, 0);
     }
 
     #[test]
     fn test_count_inversions_normal() {
-        let flat_state = vec![1, 8, 2, 4, 3, 7, 6, 5];
+        let flat_state = vec![1, 9, 2, 5, 3, 8, 7, 6];
         let count = count_inversions(&flat_state);
         assert_eq!(count, 10);
     }
@@ -173,7 +174,7 @@ mod tests {
     #[test]
     fn test_inversion_distance_trivial() {
         let puzzle =
-            Puzzle::new_from_state(vec![vec![1, 2, 3], vec![4, 5, 6], vec![7, 8, 0]]).unwrap();
+            Puzzle::new_from_state(vec![vec![1, 2, 3], vec![8, 0, 4], vec![7, 6, 5]]).unwrap();
         let distance = inversion_distance(&puzzle);
         assert_eq!(distance, 0);
     }
@@ -181,8 +182,8 @@ mod tests {
     #[test]
     fn test_inversion_distance_normal() {
         let puzzle =
-            Puzzle::new_from_state(vec![vec![6, 5, 3], vec![8, 2, 7], vec![0, 1, 4]]).unwrap();
+            Puzzle::new_from_state(vec![vec![2, 8, 3], vec![1, 0, 4], vec![7, 6, 5]]).unwrap();
         let distance = inversion_distance(&puzzle);
-        assert_eq!(distance, 20);
+        assert_eq!(distance, 4);
     }
 }

@@ -169,14 +169,14 @@ pub fn get_args() -> Vec<String> {
 }
 
 // Parse arguments
-// Expected format: executable (file | size) [-a algorithm] [-h heuristic]
+// Expected format: executable (file | size) [-a algorithm] [-h heuristic] [-t timeout] [--verbose]
 pub fn parse_args(args: Vec<String>) -> Result<Option<Settings>> {
     let len_args: usize = args.len();
     let mut settings: Settings = Settings::new_default();
 
     if len_args == 1 {
         println!(
-            "usage: {} (file | size) [-a algorithm] [-h heuristic]",
+            "usage: {} (file | size) [-a algorithm] [-h heuristic] [-t timeout] [--verbose]",
             args[0]
         );
         return Ok(None);

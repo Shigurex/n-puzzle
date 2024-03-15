@@ -17,7 +17,7 @@ mod tests {
 
     #[test]
     fn test_greedy_trivial() -> Result<()> {
-        let puzzle = Puzzle::new_from_state(vec![vec![1, 2, 3], vec![4, 5, 6], vec![7, 0, 8]])?;
+        let puzzle = Puzzle::new_from_state(vec![vec![1, 2, 3], vec![0, 8, 4], vec![7, 6, 5]])?;
         let output = solve(&puzzle, Heuristic::Hamming, None)?;
         assert!(output.path.len() == 1);
         assert!(output.path[0] == crate::Move::Right);
@@ -26,9 +26,9 @@ mod tests {
 
     #[test]
     fn test_greedy() -> Result<()> {
-        let mut puzzle = Puzzle::new_from_state(vec![vec![1, 3, 0], vec![5, 2, 6], vec![4, 7, 8]])?;
+        let mut puzzle = Puzzle::new_from_state(vec![vec![0, 2, 3], vec![1, 8, 4], vec![7, 6, 5]])?;
         let output = solve(&puzzle, Heuristic::Hamming, None)?;
-        assert!(output.path.len() == 6);
+        assert!(output.path.len() == 2);
         for m in output.path {
             puzzle.move_blank(m).unwrap();
         }
