@@ -36,8 +36,8 @@ pub fn manhattan(puzzle: &Puzzle) -> usize {
         let puzzle_pos = Pos::new(i % size, i / size);
         if let Ok(puzzle_value) = puzzle.get(puzzle_pos) {
             let answer_pos = answer_map.get(&puzzle_value).unwrap();
-            distance += (puzzle_pos.x as isize - answer_pos.x as isize).abs() as usize
-                + (puzzle_pos.y as isize - answer_pos.y as isize).abs() as usize;
+            distance += (puzzle_pos.x as isize - answer_pos.x as isize).unsigned_abs()
+                + (puzzle_pos.y as isize - answer_pos.y as isize).unsigned_abs();
         }
     }
     distance

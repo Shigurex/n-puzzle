@@ -1,6 +1,15 @@
 use anyhow::Result;
 
 #[test]
+fn test_usage() -> Result<()> {
+    let args: Vec<String> = vec![String::from("n-puzzle")];
+    match n_puzzle::run(args).unwrap() {
+        Some(_) => panic!("Should return None"),
+        None => Ok(()),
+    }
+}
+
+#[test]
 fn test_one_move() -> Result<()> {
     let args: Vec<String> = [
         "n-puzzle",
@@ -16,7 +25,8 @@ fn test_one_move() -> Result<()> {
     .map(|s| s.to_string())
     .collect();
 
-    n_puzzle::run(args)?;
+    let (_, output) = n_puzzle::run(args)?.unwrap();
+    assert_eq!(output.path.len(), 1);
     Ok(())
 }
 

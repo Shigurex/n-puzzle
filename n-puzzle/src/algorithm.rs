@@ -7,11 +7,11 @@ mod output;
 mod uniform_cost;
 
 pub use heuristic::Heuristic;
+pub use output::Output;
 
 use astar::astar;
 use closed_set::ClosedSet;
 use open_set::{OpenSet, OpenSetNode};
-use output::Output;
 
 use super::Puzzle;
 use anyhow::Result;
@@ -37,6 +37,7 @@ pub struct Solver {
     heuristic: Heuristic,
     start_state: Puzzle,
     timeout: Option<u64>,
+    verbose: bool,
 }
 
 impl Solver {
@@ -45,26 +46,27 @@ impl Solver {
         heuristic: Heuristic,
         start_state: Puzzle,
         timeout: Option<u64>,
+        verbose: bool,
     ) -> Self {
         Self {
             algorithm,
             heuristic,
             start_state,
             timeout,
+            verbose,
         }
     }
 
-    pub fn solve(&self, verbose: bool) -> Result<()> {
+    pub fn solve(&self) -> Result<Output> {
         let output = match self.algorithm {
             Algorithm::AStar => astar::solve(&self.start_state, self.heuristic, self.timeout)?,
             Algorithm::UniformCost => uniform_cost::solve(&self.start_state, self.timeout)?,
             Algorithm::Greedy => greedy::solve(&self.start_state, self.heuristic, self.timeout)?,
         };
-        self.put_result(output, verbose)?;
-        Ok(())
+        Ok(output)
     }
 
-    fn put_result(&self, output: Output, verbose: bool) -> Result<()> {
-        output.put_result(self.start_state.clone(), verbose)
+    pub fn put_result(&self, output: Output) -> Result<()> {
+        output.put_result(self.start_state.clone(), self.verbose)
     }
 }
