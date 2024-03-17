@@ -41,11 +41,11 @@ impl Settings {
         }
         match algorithm {
             "astar" => self.algorithm = Some(Algorithm::AStar),
-            "uniformcost" => self.algorithm = Some(Algorithm::UniformCost),
+            "uniform_cost" => self.algorithm = Some(Algorithm::UniformCost),
             "greedy" => self.algorithm = Some(Algorithm::Greedy),
             _ => {
                 return Err(anyhow!(
-                    "Not a valid algorithm: {}. Use astar, uniformcost, or greedy",
+                    "Not a valid algorithm: {}. Use astar, uniform_cost, or greedy",
                     algorithm
                 ))
             }
@@ -190,7 +190,7 @@ pub fn parse_args(args: Vec<String>) -> Result<Option<Settings>> {
                 i += 1;
                 if i == len_args {
                     return Err(anyhow!(
-                        "Need an algorithm: Use astar, uniformcost, or greedy"
+                        "Need an algorithm: Use astar, uniform_cost, or greedy"
                     ));
                 }
                 settings.set_algorithm(args[i].as_str())?
@@ -300,12 +300,12 @@ mod tests {
     }
 
     #[test]
-    fn test_algorithm_uniformcost() -> Result<()> {
+    fn test_algorithm_uniform_cost() -> Result<()> {
         let args: Vec<String> = vec![
             "target/debug/n-puzzle".into(),
             "3".into(),
             "-a".into(),
-            "uniformcost".into(),
+            "uniform_cost".into(),
         ];
         let settings = parse_args(args)?.unwrap();
         let answer_settings = Settings::new(
@@ -428,12 +428,12 @@ mod tests {
     }
 
     #[test]
-    fn test_uniformcost_with_heuristic() {
+    fn test_uniform_cost_with_heuristic() {
         let args: Vec<String> = vec![
             "target/debug/n-puzzle".into(),
             "3".into(),
             "-a".into(),
-            "uniformcost".into(),
+            "uniform_cost".into(),
             "-h".into(),
             "manhattan".into(),
         ];

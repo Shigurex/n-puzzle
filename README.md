@@ -93,7 +93,7 @@ Here are the details on the command options:
   - Note: Sizes 4 and above may take a long time to solve.
 - **algorithm**: Choose the solving algorithm from the following:
   - astar
-  - uniformcost
+  - uniform_cost
   - greedy
 - **heuristic**: Choose the heuristic function from the following:
   - manhattan
